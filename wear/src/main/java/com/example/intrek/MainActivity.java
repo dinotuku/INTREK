@@ -1,4 +1,4 @@
-package com.example.wear;
+package com.example.intrek;
 
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
@@ -13,5 +13,9 @@ public class MainActivity extends WearableActivity {
 
         // Enables Always-on
         setAmbientEnabled();
+
+        // Display a message on the watch
+        TextView textView = findViewById(R.id.text);
+        textView.setText("The activity is started ! A.B.");
     }
 }
