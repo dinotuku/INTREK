@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.example.intrek.BuildConfig;
 import com.example.intrek.R;
@@ -40,8 +41,7 @@ public class NewRecordingFragment extends Fragment {
         // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.fragment_new_recording, container, false);
 
-
-        Button testButton = fragmentView.findViewById(R.id.testButton);
+        ImageButton testButton = fragmentView.findViewById(R.id.testButton);
         testButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
