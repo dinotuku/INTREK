@@ -1,8 +1,11 @@
 package com.example.intrek.ui.main;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -16,9 +19,19 @@ import com.example.intrek.BuildConfig;
 import com.example.intrek.R;
 import com.example.intrek.WearService;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class NewRecordingFragment extends Fragment {
 
+
+    public static final ArrayList<String> activityTypes = new ArrayList<String>(Arrays.asList("Running","Mountain Hiking","City Hiking"));
+
+    private static final int TYPE_REQUEST = 1;
     private View fragmentView;
+
+
 
     public NewRecordingFragment() {
         // Required empty public constructor
@@ -49,8 +62,27 @@ public class NewRecordingFragment extends Fragment {
             }
         });
 
+        Button typeButton = fragmentView.findViewById(R.id.activityTypeButton);
+        typeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presentTypePickerDialog();
+            }
+        });
+
         return fragmentView;
     }
+
+    // MARK: - overriden functions
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == TYPE_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
+            Log.i("ABC","Message received");
+        }
+    }
+
 
     // MARK: - Functions for the logic of the class
 
@@ -63,4 +95,9 @@ public class NewRecordingFragment extends Fragment {
         getActivity().startService(intentStartRec);
     }
 
+    // Presents a dialog with a list view which will ask for the type
+    private void presentTypePickerDialog() {
+        Intent intent = new Intent(getActivity(), TypePickerPopUp.class);
+        startActivityForResult(intent,TYPE_REQUEST);
+    }
 }
