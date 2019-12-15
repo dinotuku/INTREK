@@ -21,15 +21,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.intrek.MainActivity;
 import com.example.intrek.R;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-
 public class TypePickerPopUp extends Activity {
+
+    public static final String NEW_INDEX = "newIndex";
+    private int selectedIndex = 0 ;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_type_picker);
+
+        // Get the index of the selected index
+        Intent i = getIntent();
+        selectedIndex = i.getIntExtra(NewRecordingFragment.SELECTED_INDEX,0);
 
         // Set the dimensions of this new activity (it's a pop-up)
         DisplayMetrics dm = new DisplayMetrics();
@@ -45,6 +49,7 @@ public class TypePickerPopUp extends Activity {
             public void onClick(View v) {
                 // Finish the activity
                 Intent i = new Intent(TypePickerPopUp.this, MainActivity.class);
+                i.putExtra(NEW_INDEX,selectedIndex);
                 setResult(AppCompatActivity.RESULT_OK,i);
                 finish();
             }
@@ -54,15 +59,18 @@ public class TypePickerPopUp extends Activity {
         ListView listView = findViewById(R.id.typeListView);
         TypesArrayAdapter adapter = new TypesArrayAdapter(TypePickerPopUp.this,R.layout.row_activity_type);
         listView.setAdapter(adapter);
-        for (String s: NewRecordingFragment.activityTypes) {
+        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        for (String s: NewRecordingFragment.ACTIVITY_TYPES) {
             adapter.add(s);
         }
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 view.setSelected(true);
+                selectedIndex = position ;
             }
         });
+        listView.setItemChecked(selectedIndex,true);
     }
 
 
