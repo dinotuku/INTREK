@@ -1,6 +1,5 @@
 package com.example.intrek.ui.main;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -19,18 +18,22 @@ import com.example.intrek.BuildConfig;
 import com.example.intrek.R;
 import com.example.intrek.WearService;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class NewRecordingFragment extends Fragment {
 
+    // MARK: - Public variables
 
-    public static final ArrayList<String> activityTypes = new ArrayList<String>(Arrays.asList("Running","Mountain Hiking","City Hiking"));
+    public static final ArrayList<String> ACTIVITY_TYPES = new ArrayList<String>(Arrays.asList("Running","Mountain Hiking","City Hiking"));
+    public static final String SELECTED_INDEX = "SelectedIndex";
+
+    // MARK: - Private variables
 
     private static final int TYPE_REQUEST = 1;
     private View fragmentView;
-
+    private int selectedType = 0 ;
+    private Button typeButton;
 
 
     public NewRecordingFragment() {
@@ -54,15 +57,15 @@ public class NewRecordingFragment extends Fragment {
         // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.fragment_new_recording, container, false);
 
-        ImageButton testButton = fragmentView.findViewById(R.id.testButton);
+        ImageButton testButton = fragmentView.findViewById(R.id.startButton);
         testButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                testButtonTapped();
+                startExercise();
             }
         });
 
-        Button typeButton = fragmentView.findViewById(R.id.activityTypeButton);
+        typeButton = fragmentView.findViewById(R.id.activityTypeButton);
         typeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,23 +73,38 @@ public class NewRecordingFragment extends Fragment {
             }
         });
 
+        updateTypeButtonText();
+
         return fragmentView;
     }
 
-    // MARK: - overriden functions
+    // MARK: - overiden functions
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == TYPE_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
-            Log.i("ABC","Message received");
+            selectedType = data.getIntExtra(TypePickerPopUp.NEW_INDEX,0);
+            updateTypeButtonText();
         }
     }
 
 
     // MARK: - Functions for the logic of the class
 
-    private void testButtonTapped() {
+    // Called when the user taps 'start' to lunch the activity screen.
+    // Must open a new activity which will present the activity.
+    private void startExercise() {
+        // Start the recording activity on the watch
+        openWatchActivity();
+
+        // Open the live activity
+        Intent intent = new Intent(getActivity(), LiveRecordingActivity.class);
+        startActivity(intent);
+    }
+
+    // This function will call the watch and start the recording
+    private void openWatchActivity() {
         Log.i("ABC","Is sending something to the watch");
         // send an intent to the watch
         Intent intentStartRec = new Intent(getActivity(), WearService.class);
@@ -98,6 +116,12 @@ public class NewRecordingFragment extends Fragment {
     // Presents a dialog with a list view which will ask for the type
     private void presentTypePickerDialog() {
         Intent intent = new Intent(getActivity(), TypePickerPopUp.class);
+        intent.putExtra(SELECTED_INDEX,selectedType);
         startActivityForResult(intent,TYPE_REQUEST);
+    }
+
+    // This function will update the text displayed on the type button
+    private void updateTypeButtonText() {
+        typeButton.setText(ACTIVITY_TYPES.get(this.selectedType));
     }
 }

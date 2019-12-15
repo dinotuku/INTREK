@@ -11,24 +11,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <activity android:name=".ui.main.LiveRecordingActivity"></activity>
         <activity android:name=".ui.main.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity android:name=".ui.main.TypePickerPopUp"
-            android:theme="@style/AppTheme.CustomTheme">
-        </activity>
-
-
-
+        <activity
+            android:name=".ui.main.TypePickerPopUp"
+            android:theme="@style/AppTheme.CustomTheme"></activity>
 
         <service android:name=".WearService">
             <intent-filter>
@@ -48,8 +45,6 @@
                     android:scheme="wear" />
             </intent-filter>
         </service>
-
-
     </application>
 
 </manifest>
