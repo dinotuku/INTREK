@@ -1,13 +1,25 @@
 package com.example.intrek.DataModel;
 
+import java.sql.Time;
 import java.util.ArrayList;
 
 public class Recording {
 
     // MARK: - Fields
 
-    private int duration = 0 ; // [s]
+    // About time
+    private Time startingTime ;
+    private Time endingTime ;
+    // All positions
+    private ArrayList<Double> lats = new ArrayList<>();
+    private ArrayList<Double> longs = new ArrayList<>();
+    // Collected data
     private ArrayList<Float> HRs = new ArrayList<>();
+    // todo : add all the sensors
+    // Comments of the users
+    private int grade; // Out of 5
+    private String name;
+    
 
     // MARK: - Public methods
 
