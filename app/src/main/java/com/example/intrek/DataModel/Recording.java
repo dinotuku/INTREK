@@ -15,6 +15,7 @@ public class Recording {
     private ArrayList<Double> longs = new ArrayList<>();
     // Collected data
     private ArrayList<Float> HRs = new ArrayList<>();
+
     // todo : add all the sensors
     // Comments of the users
     private int grade; // Out of 5

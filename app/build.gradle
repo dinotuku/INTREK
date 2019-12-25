@@ -42,4 +42,5 @@ dependencies {
 
     wearApp project(':wear')
     implementation 'com.google.android.gms:play-services-wearable:17.0.0'
+    implementation 'com.androidplot:androidplot-core:1.5.6'
 }
