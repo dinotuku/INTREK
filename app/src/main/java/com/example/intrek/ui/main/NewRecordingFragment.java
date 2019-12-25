@@ -95,6 +95,10 @@ public class NewRecordingFragment extends Fragment {
     // Called when the user taps 'start' to lunch the activity screen.
     // Must open a new activity which will present the activity.
     private void startExercise() {
+        // If the watch isn't connected, don't send anything to it...
+
+
+
         // Start the recording activity on the watch
         openWatchActivity();
 

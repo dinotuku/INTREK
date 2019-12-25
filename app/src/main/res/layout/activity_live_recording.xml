@@ -11,8 +11,8 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:background="#FB8C00"
-        android:text="Pause"
         android:onClick="pauseButtonTapped"
+        android:text="Pause"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -30,6 +30,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.androidplot.xy.XYPlot
+        android:id="@+id/HRPlot"
+        style="@style/APDefacto.Light"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/PauseButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/lineView"
+        app:layout_constraintTop_toBottomOf="@+id/HRTextView"
+        app:lineLabels="left" />
+
     <Chronometer
         android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
@@ -46,12 +62,11 @@
         android:id="@+id/HRTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="80dp"
-        android:layout_marginLeft="80dp"
-        android:text="TextView"
+        android:layout_marginTop="20dp"
+        android:text='"HeartRate"'
         android:textSize="30sp"
-        app:layout_constraintBottom_toBottomOf="@+id/timerTextView"
-        app:layout_constraintStart_toEndOf="@+id/lineView"
-        app:layout_constraintTop_toTopOf="@+id/timerTextView" />
+        app:layout_constraintEnd_toEndOf="@+id/HRPlot"
+        app:layout_constraintStart_toStartOf="@+id/HRPlot"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
