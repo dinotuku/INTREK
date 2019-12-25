@@ -33,6 +33,7 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".ui.main.LiveRecordingActivity" />
+
         <activity android:name=".ui.main.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,6 +42,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />

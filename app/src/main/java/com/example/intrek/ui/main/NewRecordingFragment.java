@@ -96,14 +96,13 @@ public class NewRecordingFragment extends Fragment {
     // Must open a new activity which will present the activity.
     private void startExercise() {
         // If the watch isn't connected, don't send anything to it...
-        
+
         // Start the recording activity on the watch
         openWatchActivity();
 
         // Open the live activity
         Intent intent = new Intent(getActivity(), LiveRecordingActivity.class);
         startActivity(intent);
-
 
     }
 
