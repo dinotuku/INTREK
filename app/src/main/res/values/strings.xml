@@ -15,4 +15,11 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="login_button">Login</string>
+    <string name="pause">Pause</string>
+    <string name="timer">Timer</string>
+    <string name="heartrate">HeartRate</string>
+    <string name="show_map">Show map</string>
+    <string name="temperature">Temperature</string>
+    <string name="pressure">Pressure</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
