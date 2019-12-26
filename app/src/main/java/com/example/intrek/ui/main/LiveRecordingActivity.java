@@ -1,10 +1,8 @@
 package com.example.intrek.ui.main;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,14 +10,10 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
@@ -45,6 +39,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import static com.example.intrek.R.id.HRPlot;
+import static com.example.intrek.R.id.pressureTextView;
 
 public class LiveRecordingActivity extends AppCompatActivity {
 
@@ -58,24 +53,38 @@ public class LiveRecordingActivity extends AppCompatActivity {
     private Chronometer timerTextView;
     private Button pauseButton;
     private XYPlot heartRatePlot;
+    private TextView speedTextView;
+    private TextView distanceTextView;
+    private TextView pressureTextView;
 
     private long timerValueWhenPaused = 0;
     private boolean isPaused = false;
     private HeartRateBroadcastReceiver heartRateBroadcastReceiver;
     private int heartRateWatch = 0;
-    private ArrayList<Integer> hrDataArrayList = new ArrayList<>();
     private XYPlotSeriesList xyPlotSeriesList;
-    private TextView speedTextView;
-    private TextView distanceTextView;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
 
     // For the location
     private int i = 0 ;
     private long initialTime = 0 ;
-    // Arrays used to compute the speed and distances
-    private ArrayList<Long> times = new ArrayList<>();
+
+    // Arrays for the location and for the distance (same time vector)
+    private ArrayList<Long> locationsTimes = new ArrayList<>();
+    private ArrayList<Long> averagedLocationsTimes = new ArrayList<>();
     private ArrayList<LatLng> locations = new ArrayList<>();
-    private FusedLocationProviderClient fusedLocationClient;
-    private LocationCallback locationCallback;
+    private ArrayList<LatLng> averagedLocations = new ArrayList<>();
+    private ArrayList<Double> distances = new ArrayList<>();
+
+
+    // Arrays for the speed
+    private ArrayList<Double> speeds = new ArrayList<>();
+    private ArrayList<Long> speedsTimes = new ArrayList<>();
+
+    // Arrays for the HR
+    private ArrayList<Integer> hrDataArrayList = new ArrayList<>();
+    private ArrayList<Long> hrTimes = new ArrayList<>();
+
 
 
     @Override
@@ -87,9 +96,11 @@ public class LiveRecordingActivity extends AppCompatActivity {
         timerTextView = findViewById(R.id.timerTextView);
         speedTextView = findViewById(R.id.SpeedTextView);
         distanceTextView = findViewById(R.id.distanceTextView);
+        pressureTextView = findViewById(R.id.pressureTextView);
         timerTextView.start();
         pauseButton = findViewById(R.id.PauseButton);
         heartRatePlot = findViewById(HRPlot);
+
         configurePlot();
         setHRPlot();
 
@@ -108,8 +119,13 @@ public class LiveRecordingActivity extends AppCompatActivity {
                 }
             }
         };
+
+        // 3. Perform the required initialisation
+        initialTime = System.currentTimeMillis();
     }
 
+
+    // region Overridden function of activity
     @Override
     protected void onResume() {
         super.onResume();
@@ -127,12 +143,9 @@ public class LiveRecordingActivity extends AppCompatActivity {
         //stopLocationUpdates();
         //LocalBroadcastManager.getInstance(this).unregisterReceiver(heartRateBroadcastReceiver);
     }
+    //endregion
 
-    public void mapButtonTapped(View view) {
-        // Open a new activity which will show the map
-        Intent startMapIntent = new Intent(LiveRecordingActivity.this, LiveMapActivity.class);
-        startActivity(startMapIntent);
-    }
+    //region Pause functions
 
     public void pauseButtonTapped(View view) {
         if (isPaused) {
@@ -162,6 +175,25 @@ public class LiveRecordingActivity extends AppCompatActivity {
         stopLocationUpdates();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(heartRateBroadcastReceiver);
         isPaused = true ;
+    }
+    //endregion
+
+
+    public void mapButtonTapped(View view) {
+        // Open a new activity which will show the map
+        Intent startMapIntent = new Intent(LiveRecordingActivity.this, LiveMapActivity.class);
+        startMapIntent.putExtra("Locations",this.locations);
+        startActivity(startMapIntent);
+    }
+
+    // Open the recording manager to view analysis of the hike
+    public void finishRecordingButtonTapped(View view) {
+        pause();
+        // 1. Create the recording
+
+
+        // 2. Send it to the new activity
+
     }
 
     // MARK: - Private methods
@@ -215,34 +247,43 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
     // This method is called everytime a new location has been obtained.
     private void onLocationChanged(Location location) {
-        if (locations.size()==0) {
-            initialTime = System.currentTimeMillis() ;
-            times.add(System.currentTimeMillis()-initialTime);
-            locations.add(new LatLng(location.getLatitude(),location.getLongitude()));
-            // Do some mathematics here
-            double dist = SphericalUtil.computeLength(locations);
-            distanceTextView.setText("Travelled distance: " + dist);
-            speedTextView.setText("Current speed:" + location.getSpeed());
-        }
-        // Noise filter: check against small radius
-        double noiseRadius = 1 ; // meter
-        double speedLowerLimit = 0.5 ; // km/h
-        LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
-        double lastDistance = SphericalUtil.computeDistanceBetween(locations.get(locations.size()-1),latLng) ;
-        if (lastDistance > noiseRadius && location.getSpeed() > speedLowerLimit) {
-            // Then it means we accept the new value
-            times.add(System.currentTimeMillis()-initialTime);
-            locations.add(latLng);
-            // Do some mathematics here
-            double dist = SphericalUtil.computeLength(locations);
-            distanceTextView.setText("Travelled distance: " + dist);
-            speedTextView.setText("Current speed:" + location.getSpeed());
-        }
-    }
 
-    //get the speed from the given location updates
-    private double computeSpeed() {
-        return 0.0;
+        int N_pos = 5 ;
+        i ++ ;
+        int numberOfPoints = locations.size();
+        if (numberOfPoints<=N_pos) {
+            // 1. Initialisation of the data
+            // Just add the values without any computation
+            locationsTimes.add(System.currentTimeMillis()-initialTime);
+            locations.add(new LatLng(location.getLatitude(),location.getLongitude()));
+        } else {
+            // 2. Average the location over N_pos last values
+            locationsTimes.add(System.currentTimeMillis()-initialTime);
+            locations.add(new LatLng(location.getLatitude(),location.getLongitude()));
+            double lats = 0.0 ;
+            double longs = 0.0 ;
+            for (int j=0; j < N_pos; j++) {
+                LatLng l = locations.get(numberOfPoints-1-j);
+                lats += l.latitude ;
+                longs += l.longitude ;
+            }
+            LatLng averagedValue = new LatLng(lats/N_pos, longs/N_pos);
+            averagedLocations.add(averagedValue);
+            averagedLocationsTimes.add(System.currentTimeMillis()-initialTime);
+
+            // 3. Do the computation for the distance for instance
+            double dist = SphericalUtil.computeLength(averagedLocations);
+            distances.add(dist);
+            distanceTextView.setText("Travelled distance: " + dist);
+        }
+
+        // 4. Save the speed
+        double speed = location.getSpeed();
+        speeds.add(speed);
+        speedsTimes.add(System.currentTimeMillis()-initialTime);
+        speedTextView.setText("Current speed:" + speed);
+        pressureTextView.setText(String.valueOf(i));
+
     }
 
     // MARK: - Inner class to listen the watch data
@@ -264,6 +305,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
             heartRatePlot.redraw();
             // And add HR value to HR ArrayList
             hrDataArrayList.add(heartRateWatch);
+            hrTimes.add(System.currentTimeMillis()-initialTime);
         }
 
     }
