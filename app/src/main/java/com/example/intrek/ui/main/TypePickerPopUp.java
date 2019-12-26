@@ -95,6 +95,8 @@ public class TypePickerPopUp extends Activity {
             // Set the text
             ((TextView) row.findViewById(R.id.activityTextView)).setText(getItem(position));
 
+
+
             return row ;
         }
     }
