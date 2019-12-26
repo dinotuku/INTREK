@@ -26,6 +26,7 @@ import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYGraphWidget;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
+import com.example.intrek.DataModel.Recording;
 import com.example.intrek.DataModel.XYPlotSeriesList;
 import com.example.intrek.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -39,7 +40,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import static com.example.intrek.R.id.HRPlot;
-import static com.example.intrek.R.id.pressureTextView;
 
 public class LiveRecordingActivity extends AppCompatActivity {
 
@@ -71,11 +71,10 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
     // Arrays for the location and for the distance (same time vector)
     private ArrayList<Long> locationsTimes = new ArrayList<>();
-    private ArrayList<Long> averagedLocationsTimes = new ArrayList<>();
     private ArrayList<LatLng> locations = new ArrayList<>();
     private ArrayList<LatLng> averagedLocations = new ArrayList<>();
+    private ArrayList<Long> distanceTimes = new ArrayList<>();
     private ArrayList<Double> distances = new ArrayList<>();
-
 
     // Arrays for the speed
     private ArrayList<Double> speeds = new ArrayList<>();
@@ -84,8 +83,6 @@ public class LiveRecordingActivity extends AppCompatActivity {
     // Arrays for the HR
     private ArrayList<Integer> hrDataArrayList = new ArrayList<>();
     private ArrayList<Long> hrTimes = new ArrayList<>();
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +96,8 @@ public class LiveRecordingActivity extends AppCompatActivity {
         pressureTextView = findViewById(R.id.pressureTextView);
         timerTextView.start();
         pauseButton = findViewById(R.id.PauseButton);
-        heartRatePlot = findViewById(HRPlot);
+        heartRatePlot = findViewById(R.id.HRPlot);
+
 
         configurePlot();
         setHRPlot();
@@ -123,7 +121,6 @@ public class LiveRecordingActivity extends AppCompatActivity {
         // 3. Perform the required initialisation
         initialTime = System.currentTimeMillis();
     }
-
 
     // region Overridden function of activity
     @Override
@@ -190,9 +187,12 @@ public class LiveRecordingActivity extends AppCompatActivity {
     public void finishRecordingButtonTapped(View view) {
         pause();
         // 1. Create the recording
-
+        Recording r = new Recording(distanceTimes,distances,speedsTimes,speeds,hrTimes,hrDataArrayList);
 
         // 2. Send it to the new activity
+        Intent i = new Intent(LiveRecordingActivity.this, RecordingAnalysisActivity.class);
+        i.putExtra("Recording", r);
+        startActivity(i);
 
     }
 
@@ -269,7 +269,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
             }
             LatLng averagedValue = new LatLng(lats/N_pos, longs/N_pos);
             averagedLocations.add(averagedValue);
-            averagedLocationsTimes.add(System.currentTimeMillis()-initialTime);
+            distanceTimes.add(System.currentTimeMillis()-initialTime);
 
             // 3. Do the computation for the distance for instance
             double dist = SphericalUtil.computeLength(averagedLocations);
