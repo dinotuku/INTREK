@@ -83,9 +83,11 @@ public class LiveRecordingActivity extends AppCompatActivity {
     // Arrays for the HR
     private ArrayList<Integer> hrDataArrayList = new ArrayList<>();
     private ArrayList<Long> hrTimes = new ArrayList<>();
+    private ArrayList<Double> altitudes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_recording);
 
@@ -187,7 +189,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
     public void finishRecordingButtonTapped(View view) {
         pause();
         // 1. Create the recording
-        Recording r = new Recording(distanceTimes,distances,speedsTimes,speeds,hrTimes,hrDataArrayList);
+        Recording r = new Recording(distanceTimes,distances,speedsTimes,speeds,altitudes,hrTimes,hrDataArrayList);
 
         // 2. Send it to the new activity
         Intent i = new Intent(LiveRecordingActivity.this, RecordingAnalysisActivity.class);
@@ -277,9 +279,11 @@ public class LiveRecordingActivity extends AppCompatActivity {
             distanceTextView.setText("Travelled distance: " + dist);
         }
 
-        // 4. Save the speed
+        // 4. Save the speed and the altitude
         double speed = location.getSpeed();
+        double altitude = location.getAltitude();
         speeds.add(speed);
+        altitudes.add(altitude);
         speedsTimes.add(System.currentTimeMillis()-initialTime);
         speedTextView.setText("Current speed:" + speed);
         pressureTextView.setText(String.valueOf(i));

@@ -10,10 +10,18 @@ public class XYPlotSeriesList {
     // List of series of coordinates
     private ArrayList<Integer[]> xList = new ArrayList<>();
     private ArrayList<Integer[]> yList = new ArrayList<>();
+
+    // Same as before but using doubles
+    private ArrayList<Double[]> xListDouble = new ArrayList<>();
+    private ArrayList<Double[]> yListDouble = new ArrayList<>();
+
+
     // List of the arrays (x,y) of the series
     private ArrayList<List<Number>> xyList = new ArrayList<>();
+
     // Contains a unique tag for each serie
     private ArrayList<String> xyTagList = new ArrayList<>();
+
     // Contains the formater to use
     private ArrayList<LineAndPointFormatter> xyFormatterList = new ArrayList<>();
 
@@ -36,21 +44,21 @@ public class XYPlotSeriesList {
     }
 
     // This method takes as input a list and will create a serie using this list as y values.
-    public void initializeWithSerie(String xyTag, ArrayList<Integer> list, LineAndPointFormatter xyFormatter) {
+    public void initializeWithDoubleSerie(String xyTag,ArrayList<Double> xValues, ArrayList<Double> yValues, LineAndPointFormatter xyFormatter) {
         xyTagList.add(xyTag);
         xyFormatterList.add(xyFormatter);
-        int NUMBER_OF_POINTS = list.size();
-        Integer[] x = new Integer[NUMBER_OF_POINTS];
-        Integer[] y = new Integer[NUMBER_OF_POINTS];
+        int NUMBER_OF_POINTS = yValues.size();
+        Double[] x = new Double[NUMBER_OF_POINTS];
+        Double[] y = new Double[NUMBER_OF_POINTS];
         List<Number> xy = new ArrayList<>();
         for (int i = 0; i < y.length; i += 1) {
-            x[i] = i;
-            y[i] = list.get(i);
+            x[i] = xValues.get(i);
+            y[i] = yValues.get(i);
             xy.add(x[i]);
             xy.add(y[i]);
         }
-        xList.add(x);
-        yList.add(y);
+        xListDouble.add(x);
+        yListDouble.add(y);
         xyList.add(xy);
     }
 
