@@ -28,6 +28,7 @@ import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
 import com.example.intrek.DataModel.Recording;
 import com.example.intrek.DataModel.XYPlotSeriesList;
+import com.example.intrek.Managers.GPSManager;
 import com.example.intrek.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -65,12 +66,11 @@ public class LiveRecordingActivity extends AppCompatActivity {
     private HeartRateBroadcastReceiver heartRateBroadcastReceiver;
     private int heartRateWatch = 0;
     private XYPlotSeriesList xyPlotSeriesList;
-    private FusedLocationProviderClient fusedLocationClient;
-    private LocationCallback locationCallback;
+    private GPSManager gpsManager;
 
     // For the location
     private int i = 0 ;
-    private long initialTime = 0 ;
+    private long initialTime = System.currentTimeMillis() ;
 
     // Arrays for the location and for the distance (same time vector)
     private ArrayList<Long> locationsTimes = new ArrayList<>();
@@ -111,20 +111,12 @@ public class LiveRecordingActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && (checkSelfPermission("android" + "" + ".permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_DENIED || checkSelfPermission("android.permission.ACCESS_COARSE_LOCATION") == PackageManager.PERMISSION_DENIED || checkSelfPermission("android" + "" + ".permission.INTERNET") == PackageManager.PERMISSION_DENIED)) {
             requestPermissions(new String[]{"android.permission.ACCESS_FINE_LOCATION", "android" + ".permission.ACCESS_COARSE_LOCATION", "android.permission.INTERNET"}, 0);
         }
-        initialTime = System.currentTimeMillis();
-        fusedLocationClient = new FusedLocationProviderClient(this);
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) { return; }
-                for (Location location : locationResult.getLocations()) {
-                    onLocationChanged(location);
-                }
-            }
-        };
+
+        //initialTime = System.currentTimeMillis();
+        gpsManager = new GPSManager(this, speedTextView,distanceTextView,altitudeTextView,dataPointsTextView);
+        gpsManager.setArraysToCollectData(locationsTimes,locations,averagedLocations,distanceTimes,distances,speedsTimes,speeds,altitudes);
 
         // 3. Perform the required initialisation
-        initialTime = System.currentTimeMillis();
         resume();
     }
 
@@ -143,7 +135,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
         timerTextView.setBase(SystemClock.elapsedRealtime() + timerValueWhenPaused);
         timerTextView.start();
         pauseButton.setText("Pause");
-        startLocationRecording();
+        gpsManager.startRecording();
 
         //Get the HR data back from the watch
         heartRateBroadcastReceiver = new HeartRateBroadcastReceiver();
@@ -156,7 +148,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
         timerValueWhenPaused = timerTextView.getBase() - SystemClock.elapsedRealtime();
         timerTextView.stop();
         pauseButton.setText("Resume");
-        stopLocationUpdates();
+        gpsManager.stopRecording();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(heartRateBroadcastReceiver);
         isPaused = true ;
     }
@@ -167,6 +159,8 @@ public class LiveRecordingActivity extends AppCompatActivity {
         // Open a new activity which will show the map
         Intent startMapIntent = new Intent(LiveRecordingActivity.this, LiveMapActivity.class);
         startMapIntent.putExtra("Locations",this.locations);
+        timerValueWhenPaused = timerTextView.getBase() - SystemClock.elapsedRealtime();
+        startMapIntent.putExtra("timerValue",timerValueWhenPaused);
         startActivity(startMapIntent);
     }
 
@@ -221,81 +215,6 @@ public class LiveRecordingActivity extends AppCompatActivity {
     }
     //endregion
 
-
-    private void startLocationRecording(){
-        LocationRequest locationRequest = new LocationRequest().setInterval(5).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-    }
-
-    private void stopLocationUpdates() {
-        fusedLocationClient.removeLocationUpdates(locationCallback);
-    }
-
-    // This method is called everytime a new location has been obtained.
-    private void onLocationChanged(Location location) {
-        int N_pos = 5 ;
-        i ++ ;
-        int numberOfPoints = locations.size();
-        if (numberOfPoints<=N_pos) {
-            // 1. Initialisation of the data
-            // Just add the values without any computation
-            locationsTimes.add(System.currentTimeMillis()-initialTime);
-            locations.add(new LatLng(location.getLatitude(),location.getLongitude()));
-        } else {
-            // 2. Average the location over N_pos last values
-            locationsTimes.add(System.currentTimeMillis()-initialTime);
-            locations.add(new LatLng(location.getLatitude(),location.getLongitude()));
-            double lats = 0.0 ;
-            double longs = 0.0 ;
-            for (int j=0; j < N_pos; j++) {
-                LatLng l = locations.get(numberOfPoints-1-j);
-                lats += l.latitude ;
-                longs += l.longitude ;
-            }
-            LatLng averagedValue = new LatLng(lats/N_pos, longs/N_pos);
-            averagedLocations.add(averagedValue);
-            distanceTimes.add(System.currentTimeMillis()-initialTime);
-
-            // 3. Do the computation for the distance for instance
-            double dist = SphericalUtil.computeLength(averagedLocations);
-            distances.add(dist);
-            displayDistance(dist);
-        }
-
-        // 4. Save the speed and the altitude
-        double speed = location.getSpeed();
-        double altitude = location.getAltitude();
-        displaySpeed(speed);
-        displayAltitude(altitude);
-        dataPointsTextView.setText(String.valueOf(i) + " GPS datapoints");
-        speeds.add(speed);
-        altitudes.add(altitude);
-        speedsTimes.add(System.currentTimeMillis()-initialTime);
-    }
-
-    // Show the travelled distance on the screen with a nice layout
-    private void displayDistance(Double dist) {
-        Double inKm = dist / 1000 ;
-        NumberFormat nf = new DecimalFormat("##.##");
-        String s = nf.format(inKm) + " km";
-        distanceTextView.setText(s);
-    }
-
-    private void displaySpeed(Double speed) {
-        if (speed > 0) {
-            Double inKmH = speed * 3.6 ;
-            Double pace = 60 / inKmH ;
-            NumberFormat nf = new DecimalFormat("##.##");
-            String s = nf.format(speed) + " [km/h] - " + nf.format(pace) + " [min/km]" ;
-            speedTextView.setText(s);
-        }
-    }
-
-    private void displayAltitude(Double alt) {
-        NumberFormat nf = new DecimalFormat("##.##");
-        String s = nf.format(alt) + " m";
-        altitudeTextView.setText(s);
-    }
 
     // MARK: - Inner class to listen the watch data
 

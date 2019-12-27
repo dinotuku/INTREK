@@ -108,7 +108,7 @@ public class Recording implements Serializable {
     private ArrayList<Double> getPace() {
         ArrayList<Double> toReturn = new ArrayList<>();
         for (Double speed: speeds){
-            if (speed >= 0.5) {
+            if (speed >= 4) {
                 toReturn.add(60/speed);
             } else {
                 toReturn.add(10.0);
@@ -147,35 +147,5 @@ public class Recording implements Serializable {
         // We now have the index of the lowest time
         return distances.get(index);
     }
-
-    /*
-
-    // Modify the array passed in parameter so that the results is now in second
-    private void microSecondsToSeconds(ArrayList<Long> array) {
-        int i = 0 ;
-        for (Long number: array) {
-            array.set(i, (long) (number*0.001));
-            i = i + 1  ;
-        }
-    }
-
-    // Returns the given array
-    private void metersToKilmeters(ArrayList<Double> array) {
-        int i = 0 ;
-        for (Double number: array) {
-            array.set(i, (number*0.001));
-            i = i + 1  ;
-        }
-    }
-
-    // Returns the given array in [km/h] if the given array is in [m/s]
-    private void mPerStoKmPerH(ArrayList<Double> array) {
-        int i = 0 ;
-        for (Double number: array) {
-            array.set(i, (number*3.6));
-            i = i + 1  ;
-        }
-    }
-     */
 
 }
