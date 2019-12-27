@@ -1,5 +1,7 @@
 package com.example.intrek.DataModel;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 // This class is implemented to provide an array and its time value.
@@ -8,13 +10,15 @@ import java.util.ArrayList;
 public class RecordingData {
 
     private String name;
+    private String unit;
     private ArrayList<Double> times = new ArrayList<>();
     private ArrayList<Double> values = new ArrayList<>();
 
-    public RecordingData(String name, ArrayList<Double> times, ArrayList<Double> values) {
+    public RecordingData(String name, ArrayList<Double> times, ArrayList<Double> values, String unit) {
         this.name = name ;
         this.times = times;
         this.values = values;
+        this.unit = unit ;
     }
 
     public String getName() {
@@ -49,6 +53,19 @@ public class RecordingData {
             }
         }
         return max;
+    }
+
+    public String getAverage() {
+        // 1. Compute the average
+        double tmp = 0.0 ;
+        for (double v: values) {
+            tmp += v ;
+        }
+        tmp = tmp / values.size() ;
+
+        // 2. construct the right string
+        NumberFormat nf = new DecimalFormat("##.##");
+        return nf.format(tmp) + " " + unit ;
     }
 
     public int getNumberOfDataPoints() {

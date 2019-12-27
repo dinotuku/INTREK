@@ -68,10 +68,10 @@ public class Recording implements Serializable {
         ArrayList<Double> paces = getPace();
 
         // 2. Construct the data to be send and return it
-        RecordingData s1 = new RecordingData("Pace",speedX,paces) ;
-        RecordingData s2 = new RecordingData("Speed",speedX,speeds) ;
-        RecordingData s3 = new RecordingData("Heart Rate",hrX,hrY) ;
-        RecordingData s4 = new RecordingData("Altitude",speedX,altitudes) ;
+        RecordingData s1 = new RecordingData("Pace",speedX,paces,"[min/km]") ;
+        RecordingData s2 = new RecordingData("Speed",speedX,speeds,"[km/h]") ;
+        RecordingData s3 = new RecordingData("Heart Rate",hrX,hrY,"[BPM]") ;
+        RecordingData s4 = new RecordingData("Altitude",speedX,altitudes,"[m]") ;
 
         ArrayList<RecordingData> statistics = new ArrayList<>();
         statistics.add(s1);
