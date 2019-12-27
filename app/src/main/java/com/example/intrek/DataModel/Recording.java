@@ -5,7 +5,10 @@ import android.util.Log;
 
 import java.io.Serializable;
 import java.sql.Time;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 // This class contains all the data of one recording and all the functions required to plot it on a analysis session.
@@ -78,14 +81,22 @@ public class Recording implements Serializable {
         return statistics;
     }
 
-    public Double getDistance() {
-        return distances.get(distances.size()-1);
+    public String getDistance() {
+        Double inMeter = distances.get(distances.size()-1) ;
+        Double inKm = inMeter / 1000 ;
+        NumberFormat nf = new DecimalFormat("##.##");
+        return nf.format(inKm) + " km";
     }
 
-    public Double getTotalTimeInSecond() {
+    public String getDuration() {
         Long lastTime = hrTimes.get(hrTimes.size()-1);
-        Double inSecond = Double.valueOf(lastTime)/1000;
-        return inSecond;
+        Long seconds = lastTime/1000;
+        int day = (int) TimeUnit.SECONDS.toDays(seconds);
+        long hours = TimeUnit.SECONDS.toHours(seconds) - (day *24);
+        long minute = TimeUnit.SECONDS.toMinutes(seconds) - (TimeUnit.SECONDS.toHours(seconds)* 60);
+        long second = TimeUnit.SECONDS.toSeconds(seconds) - (TimeUnit.SECONDS.toMinutes(seconds) *60);
+        String s = String.valueOf(hours) + "h - " + String.valueOf(minute) + "m - " + String.valueOf(second) + "s" ;
+        return s ;
     }
 
 
@@ -102,7 +113,6 @@ public class Recording implements Serializable {
             } else {
                 toReturn.add(10.0);
             }
-
         }
         return toReturn;
     }

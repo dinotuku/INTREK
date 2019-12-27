@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.SphericalUtil;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import static com.example.intrek.R.id.HRPlot;
@@ -56,6 +57,8 @@ public class LiveRecordingActivity extends AppCompatActivity {
     private TextView speedTextView;
     private TextView distanceTextView;
     private TextView pressureTextView;
+    private TextView dataPointsTextView;
+    private TextView altitudeTextView;
 
     private long timerValueWhenPaused = 0;
     private boolean isPaused = false;
@@ -96,11 +99,11 @@ public class LiveRecordingActivity extends AppCompatActivity {
         speedTextView = findViewById(R.id.SpeedTextView);
         distanceTextView = findViewById(R.id.distanceTextView);
         pressureTextView = findViewById(R.id.pressureTextView);
+        dataPointsTextView = findViewById(R.id.dataPointTextView);
+        altitudeTextView = findViewById(R.id.altitudeTextView);
         timerTextView.start();
         pauseButton = findViewById(R.id.PauseButton);
         heartRatePlot = findViewById(R.id.HRPlot);
-
-
         configurePlot();
         setHRPlot();
 
@@ -122,27 +125,8 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
         // 3. Perform the required initialisation
         initialTime = System.currentTimeMillis();
-    }
-
-    // region Overridden function of activity
-    @Override
-    protected void onResume() {
-        super.onResume();
         resume();
-        //startLocationRecording();
-        //Get the HR data back from the watch
-        //heartRateBroadcastReceiver = new HeartRateBroadcastReceiver();
-        //LocalBroadcastManager.getInstance(this).registerReceiver(heartRateBroadcastReceiver, new IntentFilter(ACTION_RECEIVE_HEART_RATE));
     }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        pause();
-        //stopLocationUpdates();
-        //LocalBroadcastManager.getInstance(this).unregisterReceiver(heartRateBroadcastReceiver);
-    }
-    //endregion
 
     //region Pause functions
 
@@ -160,6 +144,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
         timerTextView.start();
         pauseButton.setText("Pause");
         startLocationRecording();
+
         //Get the HR data back from the watch
         heartRateBroadcastReceiver = new HeartRateBroadcastReceiver();
         LocalBroadcastManager.getInstance(this).registerReceiver(heartRateBroadcastReceiver, new IntentFilter(ACTION_RECEIVE_HEART_RATE));
@@ -177,7 +162,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
     }
     //endregion
 
-
+    //region Function for handling the buttons actions
     public void mapButtonTapped(View view) {
         // Open a new activity which will show the map
         Intent startMapIntent = new Intent(LiveRecordingActivity.this, LiveMapActivity.class);
@@ -195,11 +180,10 @@ public class LiveRecordingActivity extends AppCompatActivity {
         Intent i = new Intent(LiveRecordingActivity.this, RecordingAnalysisActivity.class);
         i.putExtra("Recording", r);
         startActivity(i);
-
     }
+    //endregion
 
-    // MARK: - Private methods
-
+    //region For the HR Plot
     private void configurePlot() {
         // Get background color from Theme
         TypedValue typedValue = new TypedValue();
@@ -235,8 +219,8 @@ public class LiveRecordingActivity extends AppCompatActivity {
         heartRatePlot.addSeries(HRseries, formatterWatch);
         heartRatePlot.redraw();
     }
+    //endregion
 
-    // MARK: - methods used for location computation
 
     private void startLocationRecording(){
         LocationRequest locationRequest = new LocationRequest().setInterval(5).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -249,7 +233,6 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
     // This method is called everytime a new location has been obtained.
     private void onLocationChanged(Location location) {
-
         int N_pos = 5 ;
         i ++ ;
         int numberOfPoints = locations.size();
@@ -276,18 +259,42 @@ public class LiveRecordingActivity extends AppCompatActivity {
             // 3. Do the computation for the distance for instance
             double dist = SphericalUtil.computeLength(averagedLocations);
             distances.add(dist);
-            distanceTextView.setText("Travelled distance: " + dist);
+            displayDistance(dist);
         }
 
         // 4. Save the speed and the altitude
         double speed = location.getSpeed();
         double altitude = location.getAltitude();
+        displaySpeed(speed);
+        displayAltitude(altitude);
+        dataPointsTextView.setText(String.valueOf(i) + " GPS datapoints");
         speeds.add(speed);
         altitudes.add(altitude);
         speedsTimes.add(System.currentTimeMillis()-initialTime);
-        speedTextView.setText("Current speed:" + speed);
-        pressureTextView.setText(String.valueOf(i));
+    }
 
+    // Show the travelled distance on the screen with a nice layout
+    private void displayDistance(Double dist) {
+        Double inKm = dist / 1000 ;
+        NumberFormat nf = new DecimalFormat("##.##");
+        String s = nf.format(inKm) + " km";
+        distanceTextView.setText(s);
+    }
+
+    private void displaySpeed(Double speed) {
+        if (speed > 0) {
+            Double inKmH = speed * 3.6 ;
+            Double pace = 60 / inKmH ;
+            NumberFormat nf = new DecimalFormat("##.##");
+            String s = nf.format(speed) + " [km/h] - " + nf.format(pace) + " [min/km]" ;
+            speedTextView.setText(s);
+        }
+    }
+
+    private void displayAltitude(Double alt) {
+        NumberFormat nf = new DecimalFormat("##.##");
+        String s = nf.format(alt) + " m";
+        altitudeTextView.setText(s);
     }
 
     // MARK: - Inner class to listen the watch data
