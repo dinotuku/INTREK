@@ -96,6 +96,9 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
             configurePlot(plot, data.getMaxY());
             setPlot(plot,data,8);
 
+            // Set the average value of
+            TextView aveTv = row.findViewById(R.id.averageValueTextView) ;
+            aveTv.setText(data.getAverage());
 
             return row ;
         }

@@ -140,7 +140,7 @@ public class GPSManager {
         }
 
         // 3. Get the speed and the altitude
-        double speed = location.getSpeed();
+        double speed = location.getSpeed() * 3.6;
         double altitude = location.getAltitude();
         displaySpeed(speed);
         displayAltitude(altitude);
@@ -163,7 +163,7 @@ public class GPSManager {
 
     private void displaySpeed(Double speed) {
         if (speed > 0) {
-            Double inKmH = speed * 3.6 ;
+            Double inKmH = speed ;
             Double pace = 60 / inKmH ;
             if (pace > 20) {
                 pace = 0.0 ;
