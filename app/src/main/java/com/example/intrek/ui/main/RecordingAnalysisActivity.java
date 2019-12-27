@@ -45,6 +45,12 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
         // 2. Set the list view
         setListView();
 
+        // 3. Set the top of the screen
+        TextView durationTextView = findViewById(R.id.durationTextView);
+        TextView distanceTextView = findViewById(R.id.distanceTextView);
+        durationTextView.setText(recording.getDuration());
+        distanceTextView.setText(recording.getDistance());
+
 
     }
 

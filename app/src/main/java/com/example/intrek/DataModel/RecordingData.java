@@ -4,7 +4,9 @@ import java.util.ArrayList;
 
 // This class is implemented to provide an array and its time value.
 // It is used to pass them as reference values for the rows in list view of statistics
+// One element of this class can be plotted on a plot of the analysis activity
 public class RecordingData {
+
     private String name;
     private ArrayList<Double> times = new ArrayList<>();
     private ArrayList<Double> values = new ArrayList<>();

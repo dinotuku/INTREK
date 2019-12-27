@@ -4,6 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.widget.TextView;
 
 import com.example.intrek.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -21,6 +25,10 @@ public class LiveMapActivity extends AppCompatActivity implements OnMapReadyCall
     private GoogleMap mMap;
     private Marker mapMarker;
 
+    private TextView HRTextView ;
+
+    ArrayList<LatLng> locations;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +38,9 @@ public class LiveMapActivity extends AppCompatActivity implements OnMapReadyCall
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.GoogleMap);
         mapFragment.getMapAsync(this);
 
+        Intent intent = getIntent();
+        locations = (ArrayList<LatLng>) intent.getExtras().get("Locations");
+        HRTextView = findViewById(R.id.HRTextView);
 
 
     }
@@ -39,8 +50,6 @@ public class LiveMapActivity extends AppCompatActivity implements OnMapReadyCall
         mMap = googleMap;
 
         // Get the locations obtained
-        Intent intent = getIntent();
-        ArrayList<LatLng> locations = (ArrayList<LatLng>) intent.getExtras().get("Locations");
         LatLng currentLocation = locations.get(0);
 
         // Add a marker in the default location and move the camera
@@ -51,6 +60,8 @@ public class LiveMapActivity extends AppCompatActivity implements OnMapReadyCall
         placeMarkers(locations);
 
     }
+
+
 
     private void placeMarkers(ArrayList<LatLng> locations) {
         for (LatLng l: locations) {
