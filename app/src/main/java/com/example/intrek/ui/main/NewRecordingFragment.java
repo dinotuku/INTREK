@@ -16,6 +16,7 @@ import android.widget.ImageButton;
 
 import com.example.intrek.BuildConfig;
 import com.example.intrek.R;
+import com.example.intrek.SensorTile.DeviceScanActivity;
 import com.example.intrek.WearService;
 
 import java.util.ArrayList;
@@ -70,6 +71,15 @@ public class NewRecordingFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 presentTypePickerDialog();
+            }
+        });
+
+        Button tileButton = fragmentView.findViewById(R.id.buttonTile);
+        tileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), DeviceScanActivity.class);
+                startActivity(intent);
             }
         });
 
