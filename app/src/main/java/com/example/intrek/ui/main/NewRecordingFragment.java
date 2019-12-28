@@ -16,6 +16,7 @@ import android.widget.ImageButton;
 
 import com.example.intrek.BuildConfig;
 import com.example.intrek.R;
+import com.example.intrek.SensorTile.BlePopUp;
 import com.example.intrek.SensorTile.DeviceScanActivity;
 import com.example.intrek.WearService;
 
@@ -26,12 +27,16 @@ public class NewRecordingFragment extends Fragment {
 
     // MARK: - Public variables
 
+    public static final String DEVICE_NAME = "DEVICE_NAME";
+    public static final String DEVICE_ADDRESS = "DEVICE_ADDRESS";
+    public static final String NEW_INDEX = "newIndex";
     public static final ArrayList<String> ACTIVITY_TYPES = new ArrayList<String>(Arrays.asList("Running","Mountain Hiking","City Hiking"));
     public static final String SELECTED_INDEX = "SelectedIndex";
 
     // MARK: - Private variables
 
     private static final int TYPE_REQUEST = 1;
+    private static final int TYPE_REQUEST_TILE = 2;
     private View fragmentView;
     private int selectedType = 0 ;
     private Button typeButton;
@@ -79,7 +84,7 @@ public class NewRecordingFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), DeviceScanActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent,TYPE_REQUEST_TILE);
             }
         });
 
@@ -96,6 +101,11 @@ public class NewRecordingFragment extends Fragment {
         if (requestCode == TYPE_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
             selectedType = data.getIntExtra(TypePickerPopUp.NEW_INDEX,0);
             updateTypeButtonText();
+            Log.e("Test","Type");
+        }
+        if (requestCode == TYPE_REQUEST_TILE && resultCode == AppCompatActivity.RESULT_OK) {
+            String deviceName = data.getStringExtra(DeviceScanActivity.DEVICE_NAME);
+            Log.e("Test","Device: "+ deviceName);
         }
     }
 
