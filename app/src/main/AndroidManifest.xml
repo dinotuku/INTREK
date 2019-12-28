@@ -7,6 +7,8 @@
          location permissions for the 'MyLocation' functionality.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -48,6 +50,7 @@
         <activity
             android:name=".ui.main.TypePickerPopUp"
             android:theme="@style/AppTheme.CustomTheme" />
+        <activity android:name=".SensorTile.DeviceScanActivity" />
 
         <service android:name=".WearService">
             <intent-filter>
