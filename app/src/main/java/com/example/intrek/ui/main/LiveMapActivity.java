@@ -17,11 +17,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Cap;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +47,7 @@ public class LiveMapActivity extends AppCompatActivity implements OnMapReadyCall
     ArrayList<LatLng> locations;
     private GPSManager gpsManager;
     private Polyline polyline;
+    private Circle circle;
 
 
     @Override
@@ -104,7 +109,8 @@ public class LiveMapActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     private void drawPath(ArrayList<LatLng> locations) {
-        polyline = mMap.addPolyline(new PolylineOptions().addAll(locations).width(5).color(Color.BLUE));
+        polyline = mMap.addPolyline(new PolylineOptions().addAll(locations).width(12).color(Color.BLUE).endCap(new RoundCap()));
+        //circle = mMap.addCircle(new CircleOptions().center(locations.get(locations.size()-1)).radius(1).fillColor(Color.BLUE).strokeWidth(10f).strokeColor(Color.WHITE));
     }
 
     private void placeMarkers(ArrayList<LatLng> locations) {
@@ -119,6 +125,7 @@ public class LiveMapActivity extends AppCompatActivity implements OnMapReadyCall
         // This function is from our protocol ! Let's use it
         locations.add(point);
         polyline.setPoints(locations);
-
+        // todo: center point on the map isn't really good
+        // circle.setCenter(point);
     }
 }
