@@ -11,6 +11,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.example.intrek.ui.main.LiveRecordingActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -107,6 +108,12 @@ public class WearService extends WearableListenerService {
 
                 assert uri.getPath() != null;
                 switch (uri.getPath()) {
+                    case BuildConfig.W_path_send_HR:
+                        int heartRate = dataMapItem.getDataMap().getInt(BuildConfig.W_heart_rate);
+                        intent = new Intent(LiveRecordingActivity.ACTION_RECEIVE_HEART_RATE);
+                        intent.putExtra(LiveRecordingActivity.HEART_RATE, heartRate);
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                        break;
                     default:
                         Log.v(TAG, "Data changed for unhandled path: " + uri);
                         break;

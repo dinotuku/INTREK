@@ -5,50 +5,65 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.main.PasswordActivity" >
+    tools:context=".ui.main.InformationActivity" >
 
     <TextView
-        android:id="@+id/pwd_information_bar"
+        android:id="@+id/information_bar"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1.5"
-        android:background="@android:color/holo_green_dark"
+        android:layout_weight="2.7"
+        android:background="@android:color/holo_orange_dark"
         android:paddingLeft="12dp"
         android:paddingTop="24dp"
         android:paddingRight="120dp"
         android:paddingBottom="24dp"
-        android:text="Create a new account"
+        android:text="Set a display name and a profile picture"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         android:textColor="@android:color/white"
-        android:textSize="34sp"
         android:textStyle="bold"
-        app:autoSizeTextType="uniform" />
+        app:autoSizeTextType="uniform"
+        android:paddingStart="12dp"
+        android:paddingEnd="120dp" />
 
     <TextView
-        android:id="@+id/des_pwd_input"
+        android:id="@+id/des_display_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="6dp"
-        android:text="Password:"
+        android:text="Display Name:"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     <EditText
-        android:id="@+id/pwd_input"
+        android:id="@+id/display_name_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="6dp"
         android:autofillHints=""
         android:ems="10"
-        android:hint="Enter a password"
-        android:inputType="textPassword" />
+        android:hint="Your display name"
+        android:inputType="textEmailAddress" />
+
+    <ImageView
+        android:id="@+id/profile_picture"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        app:srcCompat="@drawable/com_facebook_profile_picture_blank_square" />
 
     <Button
-        android:id="@+id/pwd_btn"
+        android:id="@+id/choose_picture_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="chooseImage"
+        android:text="Choose a picture" />
+
+    <Button
+        android:id="@+id/information_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="6dp"
-        android:background="@android:color/holo_green_dark"
-        android:text="Signin"
+        android:background="@android:color/holo_orange_dark"
+        android:text="Done"
         android:textColor="@android:color/white" />
 
     <Space

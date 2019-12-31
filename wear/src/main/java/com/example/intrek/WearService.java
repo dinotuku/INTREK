@@ -37,8 +37,12 @@ public class WearService extends WearableListenerService {
     // Tag for Logcat
     private static final String TAG = "WearService";
 
+    // Class constants for public usages
+    public static final String HEART_RATE = "HEART_RATE";
+
     // Actions defined for the onStartCommand(...)
     public enum ACTION_SEND {
+        HEART_RATE
     }
 
     @Override
@@ -51,6 +55,11 @@ public class WearService extends WearableListenerService {
         // Match against the given action
         ACTION_SEND action = ACTION_SEND.valueOf(intent.getAction());
         switch (action) {
+            case HEART_RATE:
+                PutDataMapRequest putDataMapRequest;
+                putDataMapRequest = PutDataMapRequest.create(BuildConfig.W_path_send_HR);
+                putDataMapRequest.getDataMap().putInt(BuildConfig.W_heart_rate, intent.getIntExtra(HEART_RATE, -1));
+                sendPutDataMapRequest(putDataMapRequest); break;
             default:
                 Log.w(TAG, "Unknown action");
                 break;
@@ -72,10 +81,13 @@ public class WearService extends WearableListenerService {
                 Intent startIntent = null ;
 
                 // Find which activity has been asked for
-                if (data == BuildConfig.W_start_activity) {
-                    // Lunch the first activity.
-                    startIntent = new Intent(this,MainActivity.class);
+
+                switch (data) {
+                    case BuildConfig.W_start_activity:
+                        startIntent = new Intent(this,MainActivity.class);
+                        break ;
                 }
+
 
                 if (startIntent == null) {
                     Log.w(TAG, "Asked to start unhandled activity: " + data);

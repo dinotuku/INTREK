@@ -5,10 +5,10 @@
     android:layout_height="wrap_content" >
 
     <ImageView
-        android:id="@+id/loginBackground"
+        android:id="@+id/login_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha=".95"
+        android:alpha=".85"
         android:contentDescription="A beautiful sunset."
         android:cropToPadding="false"
         android:maxHeight="0dp"
@@ -28,13 +28,14 @@
             android:layout_weight="1" />
 
         <ImageView
-            android:id="@+id/LogoImage"
+            android:id="@+id/logo_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="67dp"
             android:layout_marginEnd="67dp"
             android:alpha="1"
             android:contentDescription="Intrek logo."
+            android:scaleType="center"
             app:srcCompat="@drawable/logo" />
 
         <Space
@@ -43,10 +44,9 @@
             android:layout_weight="5" />
 
         <com.facebook.login.widget.LoginButton
-            android:id="@+id/facebookButton"
+            android:id="@+id/facebook_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:drawable/dialog_holo_dark_frame"
             android:backgroundTint="#3B5998"
             android:filterTouchesWhenObscured="false"
             android:fitsSystemWindows="false"
@@ -62,10 +62,9 @@
             android:layout_height="16dp" />
 
         <Button
-            android:id="@+id/emailButton"
+            android:id="@+id/email_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:drawable/dialog_holo_light_frame"
             android:backgroundTint="#FFFFFF"
             android:paddingTop="20dp"
             android:paddingBottom="20dp"

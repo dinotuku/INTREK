@@ -11,6 +11,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -25,7 +26,6 @@ android {
             }
         }
     }
-
 }
 
 dependencies {
@@ -36,13 +36,18 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'com.facebook.android:facebook-android-sdk:5.13.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    implementation 'com.google.maps.android:android-maps-utils:0.4+'
     implementation 'com.google.firebase:firebase-auth:16.0.5'
-    implementation 'com.facebook.android:facebook-android-sdk:[5,6)'
+    implementation 'com.google.firebase:firebase-storage:16.0.4'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-
     wearApp project(':wear')
     implementation 'com.google.android.gms:play-services-wearable:17.0.0'
+    implementation 'com.androidplot:androidplot-core:1.5.6'
+    implementation 'com.google.firebase:firebase-database:16.0.4'
 }

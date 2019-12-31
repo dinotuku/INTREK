@@ -34,15 +34,15 @@ public class EmailActivity extends AppCompatActivity  {
 
     private FirebaseAuth mAuth;
 
-    public ProgressDialog mProgressDialog;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_email);
 
-        mEmailInputField = findViewById(R.id.emailInputField);
-        mNextButton = findViewById(R.id.emailNextButton);
+        mEmailInputField = findViewById(R.id.email_input);
+        mNextButton = findViewById(R.id.email_btn);
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,7 +60,14 @@ public class EmailActivity extends AppCompatActivity  {
             return;
         }
 
-        showProgressDialog();
+        // Show progress dialog
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("Loading");
+            mProgressDialog.setIndeterminate(true);
+        }
+
+        mProgressDialog.show();
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -81,7 +88,10 @@ public class EmailActivity extends AppCompatActivity  {
                             }
                         }
 
-                        hideProgressDialog();
+                        // Hide progress dialog
+                        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+                            mProgressDialog.dismiss();
+                        }
                     }
                 });
     }
@@ -105,21 +115,5 @@ public class EmailActivity extends AppCompatActivity  {
         }
 
         return valid;
-    }
-
-    public void showProgressDialog() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage("Loading");
-            mProgressDialog.setIndeterminate(true);
-        }
-
-        mProgressDialog.show();
-    }
-
-    public void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-        }
     }
 }

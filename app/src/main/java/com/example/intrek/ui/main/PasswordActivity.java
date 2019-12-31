@@ -1,7 +1,6 @@
 package com.example.intrek.ui.main;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
@@ -21,9 +20,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-import org.w3c.dom.Text;
 
 public class PasswordActivity extends AppCompatActivity {
 
@@ -39,16 +35,16 @@ public class PasswordActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
-    public ProgressDialog mProgressDialog;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_password);
 
-        mPasswordInformationBar = findViewById(R.id.passwordInformationBar);
-        mPasswordInputField = findViewById(R.id.passwordInputField);
-        mSignInButton = findViewById(R.id.passwordSignInButton);
+        mPasswordInformationBar = findViewById(R.id.pwd_information_bar);
+        mPasswordInputField = findViewById(R.id.pwd_input);
+        mSignInButton = findViewById(R.id.pwd_btn);
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,7 +74,14 @@ public class PasswordActivity extends AppCompatActivity {
             return;
         }
 
-        showProgressDialog();
+        // Show progress dialog
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("Loading");
+            mProgressDialog.setIndeterminate(true);
+        }
+
+        mProgressDialog.show();
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -87,8 +90,8 @@ public class PasswordActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            startMainActivity(user);
+                            Intent intent = new Intent(PasswordActivity.this, InformationActivity.class);
+                            startActivity(intent);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -96,7 +99,10 @@ public class PasswordActivity extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                         }
 
-                        hideProgressDialog();
+                        // Hide progress dialog
+                        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+                            mProgressDialog.dismiss();
+                        }
                     }
                 });
     }
@@ -107,7 +113,14 @@ public class PasswordActivity extends AppCompatActivity {
             return;
         }
 
-        showProgressDialog();
+        // Show progress dialog
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("Loading");
+            mProgressDialog.setIndeterminate(true);
+        }
+
+        mProgressDialog.show();
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -116,24 +129,22 @@ public class PasswordActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            startMainActivity(user);
+                            Intent intent = new Intent(PasswordActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.putExtra(ProfileFragment.UID, mAuth.getCurrentUser().getUid());
+                            startActivity(intent);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(PasswordActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
-                        hideProgressDialog();
+                        // Hide progress dialog
+                        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+                            mProgressDialog.dismiss();
+                        }
                     }
                 });
-    }
-
-    private void startMainActivity(FirebaseUser user) {
-        Intent intent = new Intent(PasswordActivity.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(LoginActivity.FIREBASE_USER, user.getUid());
-        startActivity(intent);
     }
 
     private boolean validateForm() {
@@ -152,21 +163,5 @@ public class PasswordActivity extends AppCompatActivity {
         }
 
         return valid;
-    }
-
-    public void showProgressDialog() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage("Loading");
-            mProgressDialog.setIndeterminate(true);
-        }
-
-        mProgressDialog.show();
-    }
-
-    public void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-        }
     }
 }
