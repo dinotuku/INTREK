@@ -8,12 +8,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
+import com.google.maps.android.PolyUtil;
 
 import java.io.Serializable;
 import java.sql.Time;
@@ -30,8 +32,7 @@ public class Recording implements Serializable {
     // MARK: - Fields
 
     ///// Generic information about the hike
-    // todo: screen to get this data
-    // todo: save duration to firebase
+
     //private String startingTime ;
     //private String endingTime ;
     private String duration;
@@ -53,6 +54,9 @@ public class Recording implements Serializable {
     private ArrayList<Long> hrTimes = new ArrayList<>();
     private ArrayList<Integer> hrDataArrayList = new ArrayList<>();
 
+    // For the map, we only need to save to URL string of the MAP
+    private String mapUrl ;
+
     // MARK: - Public methods
 
     public Recording(String duration, ArrayList<Long> distancesTimes, ArrayList<Double> distances, ArrayList<Long> speedsTimes, ArrayList<Double> speeds, ArrayList<Double> altitudes, ArrayList<Long> hrTimes, ArrayList<Integer> hrDataArrayList) {
@@ -64,6 +68,26 @@ public class Recording implements Serializable {
         this.altitudes = altitudes;
         this.hrTimes = hrTimes;
         this.hrDataArrayList = hrDataArrayList;
+    }
+
+    // This method construct the URL and save it for this recording, using the array of locations
+    public void constructURLFromLocations(ArrayList<LatLng> averagedLocations) {
+        LatLng firstLocation = averagedLocations.get(0);
+        String zoom = "15" ;
+        String size = "600x400";
+        String path = PolyUtil.encode(averagedLocations);
+        String url = "http://maps.google.com/maps/api/staticmap?"
+                + "center=" + String.valueOf(firstLocation.latitude) + "," + String.valueOf(firstLocation.longitude)
+                + "&zoom=" + zoom
+                + "&size=" + size
+                + "&path=color:0x0000ff|weight:5|enc:" + path
+                + "&sensor=false&key=AIzaSyCjDSiAyIqt1YApD1rCTgUTAFeO6Udcixs"
+                ;
+        this.mapUrl = url ;
+    }
+
+    public String getMapUrl() {
+        return this.mapUrl;
     }
 
     // This constructor is to build the statistics
@@ -113,6 +137,7 @@ public class Recording implements Serializable {
 
     public String getName() { return this.name; }
 
+
     // Returns the list of recording datas to be displayed in plots.
     public ArrayList<RecordingData> getStatistics() {
 
@@ -151,17 +176,6 @@ public class Recording implements Serializable {
 
     // Returns the duration of the hike
     public String getDuration() {
-        // So far, it works using the hrTimes array, but this isn't the good way.
-        /*
-        Long lastTime = hrTimes.get(hrTimes.size()-1);
-        Long seconds = lastTime/1000;
-        int day = (int) TimeUnit.SECONDS.toDays(seconds);
-        long hours = TimeUnit.SECONDS.toHours(seconds) - (day *24);
-        long minute = TimeUnit.SECONDS.toMinutes(seconds) - (TimeUnit.SECONDS.toHours(seconds)* 60);
-        long second = TimeUnit.SECONDS.toSeconds(seconds) - (TimeUnit.SECONDS.toMinutes(seconds) *60);
-        String s = String.valueOf(hours) + "h - " + String.valueOf(minute) + "m - " + String.valueOf(second) + "s" ;
-        return s ;
-         */
         return this.duration;
     }
 
