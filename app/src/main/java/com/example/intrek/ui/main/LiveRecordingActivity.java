@@ -26,10 +26,13 @@ import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYGraphWidget;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
+import com.example.intrek.BuildConfig;
 import com.example.intrek.DataModel.Recording;
 import com.example.intrek.DataModel.XYPlotSeriesList;
 import com.example.intrek.Managers.GPSManager;
+import com.example.intrek.Managers.HRManager;
 import com.example.intrek.R;
+import com.example.intrek.WearService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -47,10 +50,6 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
     public static final String ACTION_RECEIVE_HEART_RATE = "ACTION_RECEIVE_HEART_RATE";
     public static final String HEART_RATE = "HeartRate";
-    private static final int MIN_HR = 40;
-    private static final int MAX_HR = 200;
-    private static final int NUMBER_OF_POINTS = 50;
-    private static final String HR_PLOT_WATCH = "HR from smart watch";
 
     private Chronometer timerTextView;
     private Button pauseButton;
@@ -63,14 +62,13 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
     private long timerValueWhenPaused = 0;
     private boolean isPaused = false;
-    private HeartRateBroadcastReceiver heartRateBroadcastReceiver;
     private int heartRateWatch = 0;
     private XYPlotSeriesList xyPlotSeriesList;
     private GPSManager gpsManager;
+    private HRManager hrManager ;
 
     // For the location
     private int i = 0 ;
-    private long initialTime = System.currentTimeMillis() ;
 
     // Arrays for the location and for the distance (same time vector)
     private ArrayList<Long> locationsTimes = new ArrayList<>();
@@ -90,11 +88,10 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_recording);
 
-        // 0. Get the elements of the UI
+        // 1. Get the elements of the UI
         timerTextView = findViewById(R.id.timerTextView);
         speedTextView = findViewById(R.id.SpeedTextView);
         distanceTextView = findViewById(R.id.distanceTextView);
@@ -104,42 +101,40 @@ public class LiveRecordingActivity extends AppCompatActivity {
         timerTextView.start();
         pauseButton = findViewById(R.id.PauseButton);
         heartRatePlot = findViewById(R.id.HRPlot);
-        configurePlot();
-        setHRPlot();
 
         // 2. Add location manager to retrieve all the positions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && (checkSelfPermission("android" + "" + ".permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_DENIED || checkSelfPermission("android.permission.ACCESS_COARSE_LOCATION") == PackageManager.PERMISSION_DENIED || checkSelfPermission("android" + "" + ".permission.INTERNET") == PackageManager.PERMISSION_DENIED)) {
             requestPermissions(new String[]{"android.permission.ACCESS_FINE_LOCATION", "android" + ".permission.ACCESS_COARSE_LOCATION", "android.permission.INTERNET"}, 0);
         }
-
-        //initialTime = System.currentTimeMillis();
         gpsManager = new GPSManager(this, speedTextView,distanceTextView,altitudeTextView,dataPointsTextView);
         gpsManager.setArraysToCollectData(locationsTimes,locations,averagedLocations,distanceTimes,distances,speedsTimes,speeds,altitudes);
 
-        // 3. Perform the required initialisation
+        // 3. Add the HR manager
+        startRecordingOnWatch();
+        TextView hrTextView = findViewById(R.id.HRTextView);
+        hrManager = new HRManager(this, hrTextView) ;
+        hrManager.setToPlot(heartRatePlot,hrDataArrayList,hrTimes);
+
+        // 4. Start all recordings !
         resume();
     }
 
-    //region Pause functions
-
-    public void pauseButtonTapped(View view) {
-        if (isPaused) {
-            resume();
-        } else {
-            pause();
-        }
+    private void startRecordingOnWatch() {
+        // Send an intent to open watch
+        Intent intentStartRec = new Intent(this, WearService.class);
+        intentStartRec.setAction(WearService.ACTION_SEND.START_ACTIVITY.name());
+        intentStartRec.putExtra(WearService.START_ACTIVITY_KEY, BuildConfig.W_start_activity);
+        startService(intentStartRec);
     }
 
+    //region Pause functions
     private void resume() {
         // START AGAIN
         timerTextView.setBase(SystemClock.elapsedRealtime() + timerValueWhenPaused);
         timerTextView.start();
         pauseButton.setText("Pause");
         gpsManager.startRecording();
-
-        //Get the HR data back from the watch
-        heartRateBroadcastReceiver = new HeartRateBroadcastReceiver();
-        LocalBroadcastManager.getInstance(this).registerReceiver(heartRateBroadcastReceiver, new IntentFilter(ACTION_RECEIVE_HEART_RATE));
+        hrManager.startRecording();
         isPaused = false ;
     }
 
@@ -149,18 +144,28 @@ public class LiveRecordingActivity extends AppCompatActivity {
         timerTextView.stop();
         pauseButton.setText("Resume");
         gpsManager.stopRecording();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(heartRateBroadcastReceiver);
+        hrManager.stopRecording();
         isPaused = true ;
     }
     //endregion
 
     //region Function for handling the buttons actions
+    public void pauseButtonTapped(View view) {
+        if (isPaused) {
+            resume();
+        } else {
+            pause();
+        }
+    }
+
     public void mapButtonTapped(View view) {
         // Open a new activity which will show the map
         Intent startMapIntent = new Intent(LiveRecordingActivity.this, LiveMapActivity.class);
+        // Put all the extras for the mapActivity to work
         startMapIntent.putExtra("Locations",this.locations);
         timerValueWhenPaused = timerTextView.getBase() - SystemClock.elapsedRealtime();
         startMapIntent.putExtra("timerValue",timerValueWhenPaused);
+        startMapIntent.putExtra("distanceOffset",gpsManager.getDistance()) ;
         startActivity(startMapIntent);
     }
 
@@ -168,7 +173,8 @@ public class LiveRecordingActivity extends AppCompatActivity {
     public void finishRecordingButtonTapped(View view) {
         pause();
         // 1. Create the recording
-        Recording r = new Recording(distanceTimes,distances,speedsTimes,speeds,altitudes,hrTimes,hrDataArrayList);
+        String duration = (String) this.timerTextView.getText();
+        Recording r = new Recording(duration,distanceTimes,distances,speedsTimes,speeds,altitudes,hrTimes,hrDataArrayList);
 
         // 2. Send it to the new activity
         Intent i = new Intent(LiveRecordingActivity.this, RecordingAnalysisActivity.class);
@@ -177,67 +183,5 @@ public class LiveRecordingActivity extends AppCompatActivity {
     }
     //endregion
 
-    //region For the HR Plot
-    private void configurePlot() {
-        // Get background color from Theme
-        TypedValue typedValue = new TypedValue();
-        getTheme().resolveAttribute(android.R.attr.windowBackground, typedValue, true);
-        int backgroundColor = typedValue.data;
-        // Set background colors
-        heartRatePlot.setPlotMargins(0, 0, 0, 0);
-        heartRatePlot.getBorderPaint().setColor(backgroundColor);
-        heartRatePlot.getBackgroundPaint().setColor(backgroundColor);
-        heartRatePlot.getGraph().getBackgroundPaint().setColor(backgroundColor);
-        heartRatePlot.getGraph().getGridBackgroundPaint().setColor(backgroundColor);
-        // Set the grid color
-        heartRatePlot.getGraph().getRangeGridLinePaint().setColor(Color.DKGRAY);
-        heartRatePlot.getGraph().getDomainGridLinePaint().setColor(Color.DKGRAY);
-        // Set the origin axes colors
-        heartRatePlot.getGraph().getRangeOriginLinePaint().setColor(Color.DKGRAY);
-        heartRatePlot.getGraph().getDomainOriginLinePaint().setColor(Color.DKGRAY);
-        // Set the XY axis boundaries and step values
-        heartRatePlot.setRangeBoundaries(MIN_HR, MAX_HR, BoundaryMode.FIXED); heartRatePlot.setDomainBoundaries(0, NUMBER_OF_POINTS - 1, BoundaryMode.FIXED);
-        heartRatePlot.setRangeStepValue(9); // 9 values 40 60 ... 200
-        heartRatePlot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT).setFormat(new DecimalFormat("#"));
-        // This line is to force the Axis to be integer
-        heartRatePlot.setRangeLabel("Heart rate (bpm)");
-    }
-
-    private void setHRPlot() {
-        xyPlotSeriesList = new XYPlotSeriesList();
-        LineAndPointFormatter formatterWatch = new LineAndPointFormatter(Color.RED, Color.TRANSPARENT, Color.TRANSPARENT, null);
-        formatterWatch.getLinePaint().setStrokeWidth(8);
-        xyPlotSeriesList.initializeSeriesAndAddToList(HR_PLOT_WATCH, MIN_HR, NUMBER_OF_POINTS, formatterWatch);
-        XYSeries HRseries = new SimpleXYSeries(xyPlotSeriesList.getSeriesFromList(HR_PLOT_WATCH), SimpleXYSeries.ArrayFormat.XY_VALS_INTERLEAVED, HR_PLOT_WATCH);
-        heartRatePlot.clear();
-        heartRatePlot.addSeries(HRseries, formatterWatch);
-        heartRatePlot.redraw();
-    }
-    //endregion
-
-
-    // MARK: - Inner class to listen the watch data
-
-    private class HeartRateBroadcastReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //Show HR in a TextView
-            heartRateWatch = intent.getIntExtra(HEART_RATE, -1);
-            TextView hrTextView = findViewById(R.id.HRTextView);
-            hrTextView.setText(String.valueOf(heartRateWatch));
-            // Plot the graph
-            xyPlotSeriesList.updateSeries(HR_PLOT_WATCH, heartRateWatch);
-            XYSeries hrWatchSeries = new SimpleXYSeries(xyPlotSeriesList.getSeriesFromList(HR_PLOT_WATCH), SimpleXYSeries.ArrayFormat.XY_VALS_INTERLEAVED, HR_PLOT_WATCH);
-            LineAndPointFormatter formatterPolar = xyPlotSeriesList.getFormatterFromList(HR_PLOT_WATCH);
-            heartRatePlot.clear();
-            heartRatePlot.addSeries(hrWatchSeries, formatterPolar);
-            heartRatePlot.redraw();
-            // And add HR value to HR ArrayList
-            hrDataArrayList.add(heartRateWatch);
-            hrTimes.add(System.currentTimeMillis()-initialTime);
-        }
-
-    }
 }
 
