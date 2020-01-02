@@ -95,29 +95,12 @@ public class NewRecordingFragment extends Fragment {
     // Called when the user taps 'start' to lunch the activity screen.
     // Must open a new activity which will present the activity.
     private void startExercise() {
-        // If the watch isn't connected, don't send anything to it...
-
-        // Start the recording activity on the watch
-        openWatchActivity();
-
         // Open the live activity
         Intent intent = new Intent(getActivity(), LiveRecordingActivity.class);
         startActivity(intent);
 
     }
 
-
-
-
-    // This function will call the watch and start the recording
-    private void openWatchActivity() {
-        Log.i("ABC","Is sending something to the watch");
-        // send an intent to the watch
-        Intent intentStartRec = new Intent(getActivity(), WearService.class);
-        intentStartRec.setAction(WearService.ACTION_SEND.START_ACTIVITY.name());
-        intentStartRec.putExtra(WearService.START_ACTIVITY_KEY, BuildConfig.W_start_activity);
-        getActivity().startService(intentStartRec);
-    }
 
     // Presents a dialog with a list view which will ask for the type
     private void presentTypePickerDialog() {

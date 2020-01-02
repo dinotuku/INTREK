@@ -30,9 +30,11 @@ public class Recording implements Serializable {
     // MARK: - Fields
 
     ///// Generic information about the hike
-    // todo
-    private String startingTime ;
-    private String endingTime ;
+    // todo: screen to get this data
+    // todo: save duration to firebase
+    //private String startingTime ;
+    //private String endingTime ;
+    private String duration;
     private int grade; // Out of 5
     private String name;
 
@@ -47,14 +49,14 @@ public class Recording implements Serializable {
     private ArrayList<Double> speeds = new ArrayList<>();
     private ArrayList<Double> altitudes = new ArrayList<>();
 
-
     // Arrays for the HR
     private ArrayList<Long> hrTimes = new ArrayList<>();
     private ArrayList<Integer> hrDataArrayList = new ArrayList<>();
 
     // MARK: - Public methods
 
-    public Recording(ArrayList<Long> distancesTimes, ArrayList<Double> distances, ArrayList<Long> speedsTimes, ArrayList<Double> speeds, ArrayList<Double> altitudes, ArrayList<Long> hrTimes, ArrayList<Integer> hrDataArrayList) {
+    public Recording(String duration, ArrayList<Long> distancesTimes, ArrayList<Double> distances, ArrayList<Long> speedsTimes, ArrayList<Double> speeds, ArrayList<Double> altitudes, ArrayList<Long> hrTimes, ArrayList<Integer> hrDataArrayList) {
+        this.duration = duration;
         this.distancesTimes = distancesTimes;
         this.distances = distances;
         this.speedsTimes = speedsTimes;
@@ -79,8 +81,8 @@ public class Recording implements Serializable {
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
                 // Save everything
-                mutableData.child("startingTime").setValue(startingTime);
-                mutableData.child("endingTime").setValue(endingTime);
+                //mutableData.child("startingTime").setValue(startingTime);
+                //mutableData.child("endingTime").setValue(endingTime);
                 mutableData.child("grade").setValue(grade);
                 mutableData.child("name").setValue(name);
 
@@ -105,12 +107,13 @@ public class Recording implements Serializable {
         });
     }
 
-    public String getStartingTime() { return this.startingTime; }
+    //public String getStartingTime() { return this.startingTime; }
 
-    public String getEndingTime() { return this.endingTime; }
+    //public String getEndingTime() { return this.endingTime; }
 
     public String getName() { return this.name; }
 
+    // Returns the list of recording datas to be displayed in plots.
     public ArrayList<RecordingData> getStatistics() {
 
         // 1. Convert the obtained data here to get distances in the x-channel
@@ -124,14 +127,18 @@ public class Recording implements Serializable {
         // 2. Construct the data to be send and return it
         RecordingData s1 = new RecordingData("Pace",speedX,paces,"[min/km]") ;
         RecordingData s2 = new RecordingData("Speed",speedX,speeds,"[km/h]") ;
-        RecordingData s3 = new RecordingData("Heart Rate",hrX,hrY,"[BPM]") ;
-        RecordingData s4 = new RecordingData("Altitude",speedX,altitudes,"[m]") ;
+        RecordingData s3 = new RecordingData("Altitude",speedX,altitudes,"[m]") ;
+
 
         ArrayList<RecordingData> statistics = new ArrayList<>();
         statistics.add(s1);
         statistics.add(s2);
         statistics.add(s3);
-        statistics.add(s4);
+        if (hrY.size()>0) {
+            RecordingData s4 = new RecordingData("Heart Rate",hrX,hrY,"[BPM]");
+            statistics.add(s4);
+        }
+
         return statistics;
     }
 
@@ -142,7 +149,10 @@ public class Recording implements Serializable {
         return nf.format(inKm) + " km";
     }
 
+    // Returns the duration of the hike
     public String getDuration() {
+        // So far, it works using the hrTimes array, but this isn't the good way.
+        /*
         Long lastTime = hrTimes.get(hrTimes.size()-1);
         Long seconds = lastTime/1000;
         int day = (int) TimeUnit.SECONDS.toDays(seconds);
@@ -151,11 +161,13 @@ public class Recording implements Serializable {
         long second = TimeUnit.SECONDS.toSeconds(seconds) - (TimeUnit.SECONDS.toMinutes(seconds) *60);
         String s = String.valueOf(hours) + "h - " + String.valueOf(minute) + "m - " + String.valueOf(second) + "s" ;
         return s ;
+         */
+        return this.duration;
     }
 
     public void setGenericInformation(String startingTime, String endingTime, int grade, String name) {
-        this.startingTime = startingTime;
-        this.endingTime = endingTime;
+        //this.startingTime = startingTime;
+        //this.endingTime = endingTime;
         this.grade = grade;
         this.name = name;
     }
