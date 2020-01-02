@@ -124,14 +124,14 @@ public class HistoryFragment extends Fragment {
 
             ArrayList<RecordingData> statistics = getItem(position).getStatistics();
             String name = getItem(position).getName();
-            String endingTime = getItem(position).getEndingTime();
+            //String endingTime = getItem(position).getEndingTime();
             String duration = getItem(position).getDuration();
             String distance = getItem(position).getDistance();
             String pace = statistics.get(0).getAverage();
             String elev = String.valueOf(statistics.get(3).getMaxY() - statistics.get(3).getMinY());
 
             ((TextView) row.findViewById(R.id.hike_name)).setText(name);
-            ((TextView) row.findViewById(R.id.hike_time)).setText(endingTime);
+            //((TextView) row.findViewById(R.id.hike_time)).setText(endingTime);
             ((TextView) row.findViewById(R.id.hike_duration)).setText(duration);
             ((TextView) row.findViewById(R.id.hike_distance)).setText(distance);
             ((TextView) row.findViewById(R.id.hike_pace)).setText(pace);
@@ -163,7 +163,8 @@ public class HistoryFragment extends Fragment {
                 final ArrayList<Long> hrTimes = rec.child("hrTimes").getValue(l);
                 final ArrayList<Integer> hrDataArrayList = rec.child("hrDataArrayList").getValue(i);
 
-                final Recording recording = new Recording(distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList);
+                // todo: get duration
+                final Recording recording = new Recording("",distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList);
 
                 // Generic information about the hike
                 String startingTime = rec.child("startingTime").getValue().toString();

@@ -49,6 +49,7 @@ public class LoginActivity extends AppCompatActivity {
         mEmailButton = findViewById(R.id.email_btn);
         mFacebookButton = findViewById(R.id.facebook_btn);
 
+
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
         mCallbackManager = CallbackManager.Factory.create();
