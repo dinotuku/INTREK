@@ -175,6 +175,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
         // 1. Create the recording
         String duration = (String) this.timerTextView.getText();
         Recording r = new Recording(duration,distanceTimes,distances,speedsTimes,speeds,altitudes,hrTimes,hrDataArrayList);
+        r.constructURLFromLocations(averagedLocations);
 
         // 2. Send it to the new activity
         Intent i = new Intent(LiveRecordingActivity.this, RecordingAnalysisActivity.class);
