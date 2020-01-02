@@ -31,6 +31,8 @@ public class GPSManager {
     private LocationCallback locationCallback;
     private boolean isCollectingData;
     private boolean hasMapCallback ;
+    private boolean hasDistanceOffset ;
+    private Double distanceOffsetInMeter  ;
 
 
     // All arrays that are used and need to be updated
@@ -62,6 +64,8 @@ public class GPSManager {
         this.activity = activity;
         this.isCollectingData = false;
         this.hasMapCallback = false;
+        this.hasDistanceOffset = false ;
+        this.distanceOffsetInMeter = 0.0 ;
         this.speedTextView = speedTextView ;
         this.distanceTextView = distanceTextView ;
         this.altitudeTextView = altitudeTextView ;
@@ -95,6 +99,13 @@ public class GPSManager {
         this.callback = callback;
     }
 
+    // Set the distance offset. If this function is called, every distance outèut will be moved by a special offset in meters.
+    public void setDistanceOffset(Double offset) {
+        this.hasDistanceOffset = true ;
+        this.distanceOffsetInMeter = offset ;
+        displayDistance(0.0);
+    }
+
     public void startRecording() {
         LocationRequest locationRequest = new LocationRequest().setInterval(5).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
@@ -118,7 +129,6 @@ public class GPSManager {
         if (hasMapCallback) {
             this.callback.newPointAvailable(newPoint);
         }
-
 
         if (numberOfPoints>N_pos) {
             // 2. Average the location over N_pos last values and compute the distance
@@ -154,10 +164,14 @@ public class GPSManager {
         // 4. Callback for position
     }
 
+    public Double getDistance() {
+        return averagedLocations.size() > 0 ? SphericalUtil.computeLength(averagedLocations) : 0.0 ;
+    }
+
     private void displayDistance(Double dist) {
-        Double inKm = dist / 1000 ;
+        Double inKm = (dist + (hasDistanceOffset ? distanceOffsetInMeter : 0.0)) / 1000 ;
         NumberFormat nf = new DecimalFormat("##.##");
-        String s = nf.format(inKm) + " km";
+        String s = nf.format(inKm) + " [km]";
         distanceTextView.setText(s);
     }
 
@@ -169,14 +183,14 @@ public class GPSManager {
                 pace = 0.0 ;
             }
             NumberFormat nf = new DecimalFormat("##.##");
-            String s = nf.format(speed) + " [km/h] - " + nf.format(pace) + " [min/km]" ;
+            String s = nf.format(pace) + " [min/km]" ;
             speedTextView.setText(s);
         }
     }
 
     private void displayAltitude(Double alt) {
         NumberFormat nf = new DecimalFormat("##.##");
-        String s = nf.format(alt) + " m";
+        String s = nf.format(alt) + " [m]";
         altitudeTextView.setText(s);
     }
 

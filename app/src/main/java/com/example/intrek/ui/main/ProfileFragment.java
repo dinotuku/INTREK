@@ -114,7 +114,8 @@ public class ProfileFragment extends Fragment {
                             final ArrayList<Long> hrTimes = rec.child("hrTimes").getValue(l);
                             final ArrayList<Integer> hrDataArrayList = rec.child("hrDataArrayList").getValue(i);
 
-                            final Recording recording = new Recording(distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList);
+                            // todo: get duration
+                            final Recording recording = new Recording("",distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList);
 
                             Double inMeter = distances.get(distances.size()-1) ;
                             Double inKm = inMeter / 1000 ;
