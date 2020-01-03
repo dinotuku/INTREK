@@ -12,12 +12,17 @@ import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 public class MainActivity extends WearableActivity implements SensorEventListener {
+
+    private ConstraintLayout mLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mLayout = findViewById(R.id.recordingContainer);
 
         // Enables Always-on
         setAmbientEnabled();
@@ -52,5 +57,26 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    //// Methods for the ambient mode
+    @Override
+    public void onEnterAmbient(Bundle ambientDetails) {
+        super.onEnterAmbient(ambientDetails);
+        updateDisplay();
+    }
+
+    @Override
+    public void onExitAmbient() {
+        super.onExitAmbient();
+        updateDisplay();
+    }
+
+    private void updateDisplay() {
+        if (isAmbient()) {
+            mLayout.setBackgroundColor(getResources().getColor(android.R.color.black, getTheme()));
+        } else {
+            mLayout.setBackgroundColor(getResources().getColor(android.R.color.white, getTheme()));
+        }
     }
 }

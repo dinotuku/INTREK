@@ -226,6 +226,21 @@ public class Recording implements Serializable {
         return this.duration;
     }
 
+    public Double getAvePace() {
+        // 1. Compute the average speed
+        Double aveSpeed = 0.0 ;
+        for (Double s: speeds) {
+            aveSpeed += s ;
+        }
+        aveSpeed = aveSpeed / speeds.size() ;
+        // 2. display the average speed
+        Double avePace = 60 / aveSpeed ;
+        if (avePace > 20) {
+            avePace = 0.0 ;
+        }
+        return avePace;
+    }
+
     public String getStartingTime() { return this.startingTime; }
 
     //// Private methods for processing the data

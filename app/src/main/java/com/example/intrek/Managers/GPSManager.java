@@ -32,6 +32,7 @@ public class GPSManager {
     private boolean isCollectingData;
     private boolean hasMapCallback ;
     private boolean hasDistanceOffset ;
+    private boolean hasAvePace;
     private Double distanceOffsetInMeter  ;
 
 
@@ -42,6 +43,7 @@ public class GPSManager {
     The arrays locations and average locations are important to compute the distance as well !
      */
     private long initialTime = System.currentTimeMillis() ;
+    NumberFormat nf = new DecimalFormat("##.##");
     private int i = 0 ;
     private double currentGain = 0.0  ;
 
@@ -64,6 +66,8 @@ public class GPSManager {
     private TextView distanceTextView;
     private TextView altitudeTextView;
     private TextView dataPointsTextView;
+    private TextView avePaceTextView;
+
 
     // Set the GPS manager to the given activity.
     // If the function 'setArraysToCollectData' is not called, then it will not collect the data.
@@ -72,6 +76,7 @@ public class GPSManager {
         this.isCollectingData = false;
         this.hasMapCallback = false;
         this.hasDistanceOffset = false ;
+        this.hasAvePace = false  ;
         this.distanceOffsetInMeter = 0.0 ;
         this.speedTextView = speedTextView ;
         this.distanceTextView = distanceTextView ;
@@ -113,6 +118,11 @@ public class GPSManager {
         displayDistance(0.0);
     }
 
+    public void setAveragePactextView(TextView avePaceTextView) {
+        this.avePaceTextView = avePaceTextView ;
+        this.hasAvePace = true ;
+    }
+
     public void startRecording() {
         LocationRequest locationRequest = new LocationRequest().setInterval(5).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
@@ -146,6 +156,10 @@ public class GPSManager {
         displaySpeed(speed);
         displayAltitude(altitude);
         displayDataPoints();
+        if (hasAvePace) {
+            displayAvePace();
+        }
+
 
         // 2. Average the location over N_pos last values and compute the distance
 
@@ -193,7 +207,6 @@ public class GPSManager {
 
     private void displayDistance(Double dist) {
         Double inKm = (dist + (hasDistanceOffset ? distanceOffsetInMeter : 0.0)) / 1000 ;
-        NumberFormat nf = new DecimalFormat("##.##");
         String s = nf.format(inKm) + " [km]";
         distanceTextView.setText(s);
     }
@@ -205,14 +218,28 @@ public class GPSManager {
             if (pace > 20) {
                 pace = 0.0 ;
             }
-            NumberFormat nf = new DecimalFormat("##.##");
             String s = nf.format(pace) + " [min/km]" ;
             speedTextView.setText(s);
         }
     }
 
+    private void displayAvePace() {
+        // 1. Compute the average speed
+        Double aveSpeed = 0.0 ;
+        for (Double s: speeds) {
+            aveSpeed += s ;
+        }
+        aveSpeed = aveSpeed / speeds.size() ;
+        // 2. display the average speed
+        Double avePace = 60 / aveSpeed ;
+        if (avePace > 20) {
+            avePace = 0.0 ;
+        }
+        String s = nf.format(avePace) + " [min/km]" ;
+        avePaceTextView.setText(s);
+    }
+
     private void displayAltitude(Double alt) {
-        NumberFormat nf = new DecimalFormat("##.##");
         String s = nf.format(currentGain) + " [m]";
         altitudeTextView.setText(s);
     }

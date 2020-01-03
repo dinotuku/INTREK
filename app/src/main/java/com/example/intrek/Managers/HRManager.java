@@ -91,6 +91,7 @@ public class HRManager {
         heartRatePlot.setRangeBoundaries(MIN_HR, MAX_HR, BoundaryMode.FIXED); heartRatePlot.setDomainBoundaries(0, NUMBER_OF_POINTS - 1, BoundaryMode.FIXED);
         heartRatePlot.setRangeStepValue(9); // 9 values 40 60 ... 200
         heartRatePlot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT).setFormat(new DecimalFormat("#"));
+        heartRatePlot.getLegend().setVisible(false);
         // This line is to force the Axis to be integer
         heartRatePlot.setRangeLabel("Heart rate (bpm)");
     }
