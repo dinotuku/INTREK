@@ -33,6 +33,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.List;
 
+// Manage all the interaction between the phone and smartwatch.
+// We used the code on Moodle, remove the parts we didn't need and added cases we would use.
 public class WearService extends WearableListenerService {
 
     // Tag for Logcat

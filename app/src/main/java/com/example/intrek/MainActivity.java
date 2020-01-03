@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.intrek.ui.main.SectionsPagerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 
+// The main interface, it contains three fragments controlled by SectionPagerAdapter.
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();

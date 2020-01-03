@@ -46,6 +46,7 @@ import java.util.ArrayList;
 
 import static com.example.intrek.R.id.HRPlot;
 
+// Show statistics and heart rate plot when user starts an activity.
 public class LiveRecordingActivity extends AppCompatActivity {
 
     public static final String ACTION_RECEIVE_HEART_RATE = "ACTION_RECEIVE_HEART_RATE";

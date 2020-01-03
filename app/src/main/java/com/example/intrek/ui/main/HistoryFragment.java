@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,25 +27,27 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 
+// Show activity history. It will fetch data on Firebase and show all the recordings in a list view.
 public class HistoryFragment extends Fragment {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private View fragmentView;
+    // Fields
+
     private String uid;
-    private ListView listView;
     private RecordingAdapter adapter;
     private DatabaseReference databaseRef;
     private MyFirebaseRecordingListener mFirebaseRecordingListener;
 
+    // Constructors
+
     public HistoryFragment() {
         // Required empty public constructor
     }
+
+    // Method which will be called by SectionsPagerAdapter
 
     public static HistoryFragment newInstance() {
         HistoryFragment fragment = new HistoryFragment();
@@ -54,6 +55,8 @@ public class HistoryFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+
+    // Default methods
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,15 +67,19 @@ public class HistoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        fragmentView = inflater.inflate(R.layout.fragment_history, container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_history, container, false);
 
+        // Get user ID from intent
         uid = getActivity().getIntent().getExtras().getString(ProfileFragment.UID);
 
-        listView = fragmentView.findViewById(R.id.history_list);
+        // Set adapter for list view
+        ListView listView = fragmentView.findViewById(R.id.history_list);
         adapter = new RecordingAdapter(getActivity(), R.layout.row_history);
         listView.setAdapter(adapter);
 
-        // TODO: open the corresponding summary activity
+        // TODO: open the corresponding recording analysis
+        // Handle onClick method for each list item
+        // Open RecordingAnalysis when clicked
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -89,6 +96,7 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // register the listener
         databaseRef = FirebaseDatabase.getInstance().getReference();
         mFirebaseRecordingListener = new MyFirebaseRecordingListener();
         databaseRef.child("profiles").child(uid).child("recordings").addValueEventListener(mFirebaseRecordingListener);
@@ -101,15 +109,23 @@ public class HistoryFragment extends Fragment {
         databaseRef.child("profiles").child(uid).child("recording").removeEventListener(mFirebaseRecordingListener);
     }
 
+    // Classes
 
+    // Handle the contents of each row item
     private class RecordingAdapter extends ArrayAdapter<Recording> {
 
+        // Fields
+
         private int row_layout;
+
+        // Constructors
 
         public RecordingAdapter(FragmentActivity activity, int row_layout) {
             super(activity, row_layout);
             this.row_layout = row_layout;
         }
+
+        // Default methods
 
         @NonNull
         @Override
@@ -122,6 +138,7 @@ public class HistoryFragment extends Fragment {
                 row = LayoutInflater.from(getContext()).inflate(row_layout, parent, false);
             }
 
+            // Get statistics
             ArrayList<RecordingData> statistics = getItem(position).getStatistics();
             String name = getItem(position).getName();
             //String endingTime = getItem(position).getEndingTime();
@@ -130,6 +147,7 @@ public class HistoryFragment extends Fragment {
             String pace = statistics.get(0).getAverage();
             String elev = String.valueOf(statistics.get(3).getMaxY() - statistics.get(3).getMinY());
 
+            // Show statistics
             ((TextView) row.findViewById(R.id.hike_name)).setText(name);
             //((TextView) row.findViewById(R.id.hike_time)).setText(endingTime);
             ((TextView) row.findViewById(R.id.hike_duration)).setText(duration);
@@ -143,18 +161,27 @@ public class HistoryFragment extends Fragment {
         }
     }
 
+    // Fetch data from Firebase
     private class MyFirebaseRecordingListener implements ValueEventListener {
+
+        // Default methods
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            // otherwise it will add data every time we listens for events
+            // Otherwise it will add data every time we listens for events
             adapter.clear();
 
+            // Loop over every recording
             for (final DataSnapshot rec : dataSnapshot.getChildren()) {
-                GenericTypeIndicator<ArrayList<Long>> l = new GenericTypeIndicator<ArrayList<Long>>() {};
-                GenericTypeIndicator<ArrayList<Double>> d = new GenericTypeIndicator<ArrayList<Double>>() {};
-                GenericTypeIndicator<ArrayList<Integer>> i = new GenericTypeIndicator<ArrayList<Integer>>() {};
+                // For simply getting arrays using getValue
+                GenericTypeIndicator<ArrayList<Long>> l = new GenericTypeIndicator<ArrayList<Long>>() {
+                };
+                GenericTypeIndicator<ArrayList<Double>> d = new GenericTypeIndicator<ArrayList<Double>>() {
+                };
+                GenericTypeIndicator<ArrayList<Integer>> i = new GenericTypeIndicator<ArrayList<Integer>>() {
+                };
 
+                // Get array data
                 final ArrayList<Long> distancesTimes = rec.child("distancesTimes").getValue(l);
                 final ArrayList<Double> distances = rec.child("distances").getValue(d);
                 final ArrayList<Long> speedsTimes = rec.child("speedsTimes").getValue(l);
@@ -164,14 +191,16 @@ public class HistoryFragment extends Fragment {
                 final ArrayList<Integer> hrDataArrayList = rec.child("hrDataArrayList").getValue(i);
 
                 // todo: get duration
-                final Recording recording = new Recording("",distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList);
+                // Create a Recording object
+                final Recording recording = new Recording("", distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList);
 
-                // Generic information about the hike
+                // Get generic information about the hike
                 String startingTime = rec.child("startingTime").getValue().toString();
                 String endingTime = rec.child("endingTime").getValue().toString();
                 int grade = rec.child("grade").getValue(int.class);
                 String name = rec.child("name").getValue().toString();
 
+                // Save generic information to the Recording object
                 recording.setGenericInformation(startingTime, endingTime, grade, name);
 
                 adapter.add(recording);

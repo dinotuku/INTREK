@@ -27,11 +27,12 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+// The entry activity. It provides two login options, Facebook login and email/password login.
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
-    public static final String FIREBASE_USER = "FIREBASE_USER";
+    // Fields
 
     private Button mEmailButton;
     private LoginButton mFacebookButton;
@@ -40,6 +41,8 @@ public class LoginActivity extends AppCompatActivity {
     private CallbackManager mCallbackManager;
 
     private ProgressDialog mProgressDialog;
+
+    // Default methods
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,7 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mCallbackManager = CallbackManager.Factory.create();
 
+        // Start email/password login process
         mEmailButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,6 +66,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Start Facebook login process
         mFacebookButton.setReadPermissions("email", "public_profile");
         mFacebookButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -90,6 +95,9 @@ public class LoginActivity extends AppCompatActivity {
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    // Methods
+
+    // Handle successful cases for Facebook login
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
         // Show progress dialog
@@ -98,7 +106,6 @@ public class LoginActivity extends AppCompatActivity {
             mProgressDialog.setMessage("Loading");
             mProgressDialog.setIndeterminate(true);
         }
-
         mProgressDialog.show();
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
@@ -110,7 +117,6 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             // TODO: handle registered user
                             Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
                             Intent intent = new Intent(LoginActivity.this, InformationActivity.class);
                             startActivity(intent);
                         } else {
@@ -126,10 +132,5 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                 });
-    }
-
-    public void signOut() {
-        mAuth.signOut();
-        LoginManager.getInstance().logOut();
     }
 }
