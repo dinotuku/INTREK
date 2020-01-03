@@ -40,9 +40,9 @@ Group 2.C: Sports e-hiking
 * `LiveRecordingActivity` - Show statistics and heart rate plot when user starts an activity.
 * `LoginActivity` - The entry activity. It provides two login options, Facebook login and email/password login.
 * `NewRecordingActivity` - The activity before a live recording. It provides user different types of activities.
-* `PasswordActivity` - // For user to enter password. It will validate the password and use FirebaseAuth to either sign in or register the user depending on the exceptions threw in EmailActivity.
-* `ProfileFragment` - // Show user information and statistics. It will fetch data on Firebase and do some simple calculation.
-* `RecordingAnalysisActivity` - // Show a summary of a completed hike. The summary will contain statistics and plots of sensor values.
+* `PasswordActivity` - For user to enter password. It will validate the password and use FirebaseAuth to either sign in or register the user depending on the exceptions threw in EmailActivity.
+* `ProfileFragment` - Show user information and statistics. It will fetch data on Firebase and do some simple calculation.
+* `RecordingAnalysisActivity` - Show a summary of a completed hike. The summary will contain statistics and plots of sensor values.
 * `SectionsPagerAdapter` - A FragmentPagerAdapter that returns a fragment corresponding to one of the sections/tabs/pages.
 * `TypePickerPopUp` - Handle the picker in NewRecordingActivity.
 
