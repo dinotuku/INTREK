@@ -165,7 +165,7 @@
         app:layout_constraintTop_toTopOf="@+id/PauseButton" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/temperatureTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
@@ -183,14 +183,14 @@
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="@+id/view8"
         app:layout_constraintStart_toStartOf="@+id/view8"
-        app:layout_constraintTop_toTopOf="@+id/textView2" />
+        app:layout_constraintTop_toTopOf="@+id/temperatureTextView" />
 
     <TextView
         android:id="@+id/SpeedTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Travel speed"
+        android:text="0 [min/km]"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/view4"
@@ -202,7 +202,7 @@
         android:layout_height="39dp"
         android:layout_marginTop="5dp"
         android:gravity="center"
-        android:text="Distance "
+        android:text="0 [km] "
         android:textSize="24sp"
         app:layout_constraintEnd_toStartOf="@+id/view4"
         app:layout_constraintStart_toStartOf="parent"
@@ -226,7 +226,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:gravity="center"
-        android:text="Altitude"
+        android:text="0 [m]"
         android:textSize="24sp"
         app:layout_constraintEnd_toStartOf="@+id/view4"
         app:layout_constraintStart_toStartOf="parent"
@@ -240,6 +240,7 @@
         android:layout_marginRight="12dp"
         android:layout_marginBottom="12dp"
         android:text="DataPoint"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/view2"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -302,8 +303,18 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginLeft="20dp"
-        android:text="Speed"
+        android:text="Pace"
         app:layout_constraintStart_toEndOf="@+id/view4"
         app:layout_constraintTop_toTopOf="@+id/textView4" />
+
+    <TextView
+        android:id="@+id/avePaceTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 [min/km]"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/view4"
+        app:layout_constraintTop_toTopOf="@+id/altitudeTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
