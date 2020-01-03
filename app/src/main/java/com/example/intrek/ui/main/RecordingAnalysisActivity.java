@@ -50,6 +50,8 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
     private ListView listView;
     private boolean isFromLiveRecording;
 
+    private EditText hikeNameEditText ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,10 +86,9 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
 
     public void saveButtonTapped(View view) {
         // 1. obtain the name
-        EditText ed = (EditText) listView.getChildAt(0).findViewById(R.id.HikeNameEditText) ;
-        String text = ed.getText().toString();
+        String text = hikeNameEditText.getText().toString();
         if (TextUtils.isEmpty(text)) {
-            ed.setError("Name required.");
+            hikeNameEditText.setError("Name required.");
         } else {
             // set name
             recording.setName(text);
@@ -188,11 +189,11 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
             elevationTV.setText("TODO");
 
             // Set eventually the name
+            hikeNameEditText = row.findViewById(R.id.HikeNameEditText) ;
             if (!isFromLiveRecording) {
                 // Set the text of the editText
-                EditText ed = row.findViewById(R.id.HikeNameEditText) ;
-                ed.setText(recording.getName(),TextView.BufferType.EDITABLE);
-                ed.setEnabled(false);
+                hikeNameEditText.setText(recording.getName(),TextView.BufferType.EDITABLE);
+                hikeNameEditText.setEnabled(false);
             }
 
             // plot the map's data

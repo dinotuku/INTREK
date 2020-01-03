@@ -200,6 +200,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
         Recording r = new Recording(duration,distanceTimes,distances,speedsTimes,speeds,altitudes,hrTimes,hrDataArrayList,temperaturesTimesArray, temperaturesArray, pressuresTimesArray, pressuresArray);
         r.constructURLFromLocations(averagedLocations);
         r.setStartingTime(startingTime);
+        r.setElevationGain(gpsManager.getElevationGain());
 
 
         // 2. Send it to the new activity

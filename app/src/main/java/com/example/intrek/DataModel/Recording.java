@@ -37,6 +37,7 @@ public class Recording implements Serializable {
     private String duration;
     private String name;
     private String mapUrl ;
+    private Double elevationGain ;
 
 
     //// Collected data on the hike to be analysed
@@ -97,11 +98,12 @@ public class Recording implements Serializable {
     }
 
     // This method is called when receivng the data from firebase
-    public void setGenericInformation(String startingTime, String name, String mapUrl, String duration) {
+    public void setGenericInformation(String startingTime, String name, String mapUrl, String duration, Double elevationGain) {
         this.startingTime = startingTime;
         this.name = name ;
         this.mapUrl = mapUrl ;
         this.duration = duration ;
+        this.elevationGain = elevationGain ;
     }
 
     // Save recording to Firebase realtime database. The user Id is reauired in order to save the data to the correct user.
@@ -119,6 +121,7 @@ public class Recording implements Serializable {
                 // Save everything
                 mutableData.child("startingTime").setValue(startingTime);
                 mutableData.child("name").setValue(name);
+                mutableData.child("elevationGain").setValue(elevationGain);
                 mutableData.child("mapUrl").setValue(mapUrl);
                 mutableData.child("duration").setValue(duration);
                 mutableData.child("distancesTimes").setValue(distancesTimes);
@@ -196,6 +199,14 @@ public class Recording implements Serializable {
 
     public void setStartingTime(String startingTime) {
         this.startingTime = startingTime;
+    }
+
+    public void setElevationGain(Double elevationGain) {
+        this.elevationGain = elevationGain;
+    }
+
+    public Double getElevationGain() {
+        return elevationGain;
     }
 
     public String getName() { return this.name; }
