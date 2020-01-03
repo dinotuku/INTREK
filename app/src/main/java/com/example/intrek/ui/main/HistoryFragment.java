@@ -135,15 +135,12 @@ public class HistoryFragment extends Fragment {
             String pace = statistics.get(0).getAverage();
             String elev = nf.format(getItem(position).getElevationGain()) + " [m]";
 
-
-
             ((TextView) row.findViewById(R.id.hike_name)).setText(name);
             ((TextView) row.findViewById(R.id.hike_time)).setText(time);
             ((TextView) row.findViewById(R.id.hike_duration)).setText(duration);
             ((TextView) row.findViewById(R.id.hike_distance)).setText(distance);
             ((TextView) row.findViewById(R.id.hike_pace)).setText(pace);
             ((TextView) row.findViewById(R.id.hike_elev_gain)).setText(elev);
-
 
             return row;
         }
