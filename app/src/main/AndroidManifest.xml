@@ -18,6 +18,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".ui.main.RecordingAnalysisActivity"
@@ -59,8 +60,9 @@
         <activity
             android:name=".ui.main.EmailActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity android:name=".MainActivity" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.main.TypePickerPopUp"
             android:theme="@style/AppTheme.CustomTheme" />

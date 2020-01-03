@@ -12,7 +12,7 @@
         android:id="@+id/ProfileConstraintLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="1.2"
         tools:context=".ui.main.ProfileFragment">
 
         <ImageView
@@ -21,6 +21,7 @@
             android:layout_height="100dp"
             android:layout_marginStart="12dp"
             android:layout_marginLeft="12dp"
+            android:contentDescription="@string/profile_picture_description"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -81,7 +82,7 @@
             android:layout_marginStart="12dp"
             android:layout_marginLeft="12dp"
             android:layout_marginTop="16dp"
-            android:text="Total Hikes"
+            android:text="@string/total_hikes_description"
             app:layout_constraintStart_toEndOf="@+id/profile_picture"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -92,7 +93,7 @@
             android:layout_marginStart="12dp"
             android:layout_marginLeft="12dp"
             android:layout_marginTop="16dp"
-            android:text="Avg. Distance [km]"
+            android:text="@string/avg_distance_km_description"
             app:layout_constraintStart_toEndOf="@+id/VerticalLine"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -103,18 +104,18 @@
             android:layout_marginStart="12dp"
             android:layout_marginLeft="12dp"
             android:layout_marginTop="16dp"
-            android:text="Avg. Pace [min/km]"
+            android:text="@string/avg_pace_min_km_description"
             app:layout_constraintStart_toEndOf="@+id/profile_picture"
             app:layout_constraintTop_toBottomOf="@+id/LeftHorizontalLine" />
 
         <TextView
-            android:id="@+id/des_avg_elev_gain"
+            android:id="@+id/des_avg_elev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginLeft="12dp"
             android:layout_marginTop="16dp"
-            android:text="Avg. Elevation [m]"
+            android:text="@string/avg_elevation_m_description"
             app:layout_constraintStart_toEndOf="@+id/VerticalLine"
             app:layout_constraintTop_toBottomOf="@+id/RightHorizontalLine" />
 
@@ -123,6 +124,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="28sp"
+            app:autoSizeMaxTextSize="28sp"
+            app:autoSizeMinTextSize="20sp"
             app:layout_constraintBottom_toTopOf="@+id/LeftHorizontalLine"
             app:layout_constraintEnd_toStartOf="@+id/VerticalLine"
             app:layout_constraintStart_toEndOf="@+id/profile_picture"
@@ -133,6 +136,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="28sp"
+            app:autoSizeMaxTextSize="28sp"
+            app:autoSizeMinTextSize="20sp"
             app:autoSizeTextType="uniform"
             app:layout_constraintBottom_toTopOf="@+id/RightHorizontalLine"
             app:layout_constraintEnd_toEndOf="parent"
@@ -144,34 +149,203 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="28sp"
+            app:autoSizeMaxTextSize="28sp"
+            app:autoSizeMinTextSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/VerticalLine"
             app:layout_constraintStart_toEndOf="@+id/profile_picture"
             app:layout_constraintTop_toBottomOf="@+id/des_avg_pace" />
 
         <TextView
-            android:id="@+id/avg_elev_gain"
+            android:id="@+id/avg_elev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="28sp"
+            app:autoSizeMaxTextSize="28sp"
+            app:autoSizeMinTextSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/VerticalLine"
-            app:layout_constraintTop_toBottomOf="@+id/des_avg_elev_gain" />
+            app:layout_constraintTop_toBottomOf="@+id/des_avg_elev" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
-        android:id="@+id/AchievementsLinearLayout"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
-        android:orientation="vertical">
+        android:layout_weight="0.5"
+        android:background="#ff8800">
 
-        <ListView
-            android:id="@+id/achievements_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+        <TextView
+            android:id="@+id/des_total_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/total_distance_description"
+            android:textColor="#FFF"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/total_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFF"
+            android:textSize="30sp"
+            android:textStyle="bold|italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5">
+
+        <TextView
+            android:id="@+id/des_total_elev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/total_elevation_description"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/total_elev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:textStyle="bold|italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:background="#ff8800">
+
+        <TextView
+            android:id="@+id/des_far_hike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/farthest_hike_description"
+            android:textColor="#FFF"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/far_hike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFF"
+            android:textSize="30sp"
+            android:textStyle="bold|italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/date_far_hike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFF"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/far_hike" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5">
+
+        <TextView
+            android:id="@+id/des_long_hike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/longest_hike_description"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/long_hike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:textStyle="bold|italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/date_long_hike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/long_hike" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"
+        android:background="#ff8800">
+
+        <TextView
+            android:id="@+id/des_high_elev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/highest_elevation_description"
+            android:textColor="#FFF"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/high_elev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFF"
+            android:textSize="30sp"
+            android:textStyle="bold|italic"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/date_high_elev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFF"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/high_elev" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>

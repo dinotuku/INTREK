@@ -2,26 +2,41 @@ package com.example.intrek.DataModel;
 
 import java.io.Serializable;
 
+// Store user information and statistics.
 // to send different type of data together (not one by one) through an Intent
 public class Profile implements Serializable {
     private static final String TAG = "Profile";
+
+    // Fields
 
     private String uid;
     private String username;
     private String email;
     private String photoPath;
 
-    private long totalHikes;
-    private Double avgDistance;
-    private Double avgPace;
-    private Double avgElevGain;
+    public long totalHikes;
+    public Double avgDistance;
+    public Double avgPace;
+    public Double avgElevation;
+
+    public Double totalDistance;
+    public Double totalElevation;
+    public Double farthestHike;
+    public String longestHike;
+    public Double highestElevation;
+
+    public String farthestHikeDate;
+    public String longestHikeDate;
+    public String highestElevationDate;
+
+    // Constructors
 
     public Profile(String uid, String email) {
         this.uid = uid;
         this.email = email;
     }
 
-    // Getter
+    // Getters
 
     public String getUid() { return this.uid; }
 
@@ -31,27 +46,11 @@ public class Profile implements Serializable {
 
     public String getPhotoPath() { return this.photoPath; }
 
-    public long getTotalHikes() { return this.totalHikes; }
 
-    public Double getAvgDistance() { return this.avgDistance; }
-
-    public Double getAvgPace() { return this.avgPace; }
-
-    public Double getAvgElevGain() { return  this.avgElevGain; }
-
-    // Setter
+    // Setters
 
     public void setUsername(String username) { this.username = username; }
 
-    public void setEmail(String email) { this.email = email; }
-
     public void setPhotoPath(String path) { this.photoPath = path; }
-
-    public void setStatistics(long totalHikes, Double avgDistance, Double avgPace, Double avgElevGain) {
-        this.totalHikes = totalHikes;
-        this.avgDistance = avgDistance;
-        this.avgPace = avgPace;
-        this.avgElevGain = avgElevGain;
-    }
 }
 

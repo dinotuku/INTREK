@@ -21,27 +21,35 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+// For user to enter password. It will validate the password and
+// use FirebaseAuth to either sign in or register the user
+// depending on the exceptions threw in EmailActivity.
 public class PasswordActivity extends AppCompatActivity {
 
     private static final String TAG = PasswordActivity.class.getSimpleName();
+
+    // Fields
 
     public static final int NEW_USER_TYPE = 1;
 
     private TextView mPasswordInformationBar;
     private EditText mPasswordInputField;
     private Button mSignInButton;
+    private ProgressDialog mProgressDialog;
+
     private String email;
     private boolean newUser = true;
 
     private FirebaseAuth mAuth;
 
-    private ProgressDialog mProgressDialog;
+    // Default methods
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_password);
 
+        // Get password and either register or sign in a user
         mPasswordInformationBar = findViewById(R.id.pwd_information_bar);
         mPasswordInputField = findViewById(R.id.pwd_input);
         mSignInButton = findViewById(R.id.pwd_btn);
@@ -63,11 +71,14 @@ public class PasswordActivity extends AppCompatActivity {
         email = getIntent().getStringExtra(EmailActivity.USER_EMAIL);
         newUser = getIntent().getBooleanExtra(EmailActivity.NEW_USER, true);
         if (!newUser) {
-            mPasswordInformationBar.setText("Welcome back! Enter password to sign in");
+            mPasswordInformationBar.setText(R.string.registered_user_message);
             mPasswordInputField.setHint("Enter your password");
         }
     }
 
+    // Methods
+
+    // Create a new account for a new user
     private void createAccount(String email, String password) {
         Log.d(TAG, "createAccount:" + email);
         if (!validateForm()) {
@@ -80,7 +91,6 @@ public class PasswordActivity extends AppCompatActivity {
             mProgressDialog.setMessage("Loading");
             mProgressDialog.setIndeterminate(true);
         }
-
         mProgressDialog.show();
 
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -107,6 +117,7 @@ public class PasswordActivity extends AppCompatActivity {
                 });
     }
 
+    // Sign in an existing user
     private void signIn(String email, String password) {
         Log.d(TAG, "signIn:" + email);
         if (!validateForm()) {
@@ -119,7 +130,6 @@ public class PasswordActivity extends AppCompatActivity {
             mProgressDialog.setMessage("Loading");
             mProgressDialog.setIndeterminate(true);
         }
-
         mProgressDialog.show();
 
         mAuth.signInWithEmailAndPassword(email, password)
@@ -147,6 +157,7 @@ public class PasswordActivity extends AppCompatActivity {
                 });
     }
 
+    // Validate if the password is empty or less than 6 characters
     private boolean validateForm() {
         boolean valid = true;
 

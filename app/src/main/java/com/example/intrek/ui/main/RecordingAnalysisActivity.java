@@ -44,6 +44,8 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+// Show a summary of a completed hike.
+// The summary will contain statistics and plots of sensor values.
 public class RecordingAnalysisActivity extends AppCompatActivity {
 
     private Recording recording ;
@@ -202,7 +204,6 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
             // plot the map's data
             String url = "https://maps.googleapis.com/maps/api/staticmap?center=40.714%2c%20-73.998&zoom=12&size=400x400&key=AIzaSyCjDSiAyIqt1YApD1rCTgUTAFeO6Udcixs" ;
             new DownloadImageTask((ImageView) row.findViewById(R.id.mapImageView)).execute(recording.getMapUrl());
-
         }
 
 
