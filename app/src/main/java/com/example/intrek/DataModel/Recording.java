@@ -33,11 +33,11 @@ public class Recording implements Serializable {
 
     ///// Generic information about the hike
 
-    //private String startingTime ;
-    //private String endingTime ;
+    private String startingTime ;
     private String duration;
-    private int grade; // Out of 5
     private String name;
+    private String mapUrl ;
+
 
     //// Collected data on the hike to be analysed
 
@@ -54,12 +54,16 @@ public class Recording implements Serializable {
     private ArrayList<Long> hrTimes = new ArrayList<>();
     private ArrayList<Integer> hrDataArrayList = new ArrayList<>();
 
-    // For the map, we only need to save to URL string of the MAP
-    private String mapUrl ;
+    // Arrays for the microcontroller
+    private ArrayList<Double> temperaturesArray = new ArrayList<>();
+    private ArrayList<Double> pressuresArray = new ArrayList<>();
+    private ArrayList<Long> temperaturesTimesArray = new ArrayList<>();
+    private ArrayList<Long> pressuresTimesArray = new ArrayList<>();
+
 
     // MARK: - Public methods
 
-    public Recording(String duration, ArrayList<Long> distancesTimes, ArrayList<Double> distances, ArrayList<Long> speedsTimes, ArrayList<Double> speeds, ArrayList<Double> altitudes, ArrayList<Long> hrTimes, ArrayList<Integer> hrDataArrayList) {
+    public Recording(String duration, ArrayList<Long> distancesTimes, ArrayList<Double> distances, ArrayList<Long> speedsTimes, ArrayList<Double> speeds, ArrayList<Double> altitudes, ArrayList<Long> hrTimes, ArrayList<Integer> hrDataArrayList,ArrayList<Long> temperaturesTimesArray, ArrayList<Double> temperaturesArray, ArrayList<Long> pressuresTimesArray, ArrayList<Double> pressuresArray) {
         this.duration = duration;
         this.distancesTimes = distancesTimes;
         this.distances = distances;
@@ -68,9 +72,15 @@ public class Recording implements Serializable {
         this.altitudes = altitudes;
         this.hrTimes = hrTimes;
         this.hrDataArrayList = hrDataArrayList;
+        this.temperaturesTimesArray = temperaturesTimesArray ;
+        this.temperaturesArray = temperaturesArray ;
+        this.pressuresTimesArray = pressuresTimesArray;
+        this. pressuresArray = pressuresArray ;
     }
 
+    // To save the image of the map, we only keep the url of the google map link
     // This method construct the URL and save it for this recording, using the array of locations
+    // It uses the array of all locations to contruct the path
     public void constructURLFromLocations(ArrayList<LatLng> averagedLocations) {
         LatLng firstLocation = averagedLocations.get(0);
         String zoom = "15" ;
@@ -86,13 +96,15 @@ public class Recording implements Serializable {
         this.mapUrl = url ;
     }
 
-    public String getMapUrl() {
-        return this.mapUrl;
+    // This method is called when receivng the data from firebase
+    public void setGenericInformation(String startingTime, String name, String mapUrl, String duration) {
+        this.startingTime = startingTime;
+        this.name = name ;
+        this.mapUrl = mapUrl ;
+        this.duration = duration ;
     }
 
-    // This constructor is to build the statistics
-
-    // Save recording to Firebase realtime database
+    // Save recording to Firebase realtime database. The user Id is reauired in order to save the data to the correct user.
     public void saveToFirebase(String uid) {
         // Get the recordings reference of the user in database
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -105,11 +117,10 @@ public class Recording implements Serializable {
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
                 // Save everything
-                //mutableData.child("startingTime").setValue(startingTime);
-                //mutableData.child("endingTime").setValue(endingTime);
-                mutableData.child("grade").setValue(grade);
+                mutableData.child("startingTime").setValue(startingTime);
                 mutableData.child("name").setValue(name);
-
+                mutableData.child("mapUrl").setValue(mapUrl);
+                mutableData.child("duration").setValue(duration);
                 mutableData.child("distancesTimes").setValue(distancesTimes);
                 mutableData.child("distances").setValue(distances);
                 mutableData.child("speedsTimes").setValue(speedsTimes);
@@ -117,6 +128,10 @@ public class Recording implements Serializable {
                 mutableData.child("altitudes").setValue(altitudes);
                 mutableData.child("hrTimes").setValue(hrTimes);
                 mutableData.child("hrDataArrayList").setValue(hrDataArrayList);
+                mutableData.child("temperaturesArray").setValue(temperaturesArray);
+                mutableData.child("pressuresArray").setValue(pressuresArray);
+                mutableData.child("temperaturesTimesArray").setValue(temperaturesTimesArray);
+                mutableData.child("pressuresTimesArray").setValue(pressuresTimesArray);
                 return Transaction.success(mutableData);
             }
 
@@ -131,41 +146,59 @@ public class Recording implements Serializable {
         });
     }
 
-    //public String getStartingTime() { return this.startingTime; }
-
-    //public String getEndingTime() { return this.endingTime; }
-
-    public String getName() { return this.name; }
-
-
     // Returns the list of recording datas to be displayed in plots.
     public ArrayList<RecordingData> getStatistics() {
 
-        // 1. Convert the obtained data here to get distances in the x-channel
-        // Construct the distances array
-        ArrayList<Double> speedX = getDistancesFromTimes(speedsTimes);
-        ArrayList<Double> hrX = getDistancesFromTimes(hrTimes);
-        // Construct new HR and the pace
+        //// 1. Convert the obtained data here to get distances in the x-channel
+        // Indeed, we have the arrays as function of time but we want them as function of distance...
+        //// 2. Construct the data to be send and return it
+
+        // Construct the distances array for the pace, the speed and the altitude
+        ArrayList<Double> gpsX = getDistancesFromTimes(speedsTimes);
         ArrayList<Double> hrY = getHRAsDouble() ;
         ArrayList<Double> paces = getPace();
 
-        // 2. Construct the data to be send and return it
-        RecordingData s1 = new RecordingData("Pace",speedX,paces,"[min/km]") ;
-        RecordingData s2 = new RecordingData("Speed",speedX,speeds,"[km/h]") ;
-        RecordingData s3 = new RecordingData("Altitude",speedX,altitudes,"[m]") ;
-
-
         ArrayList<RecordingData> statistics = new ArrayList<>();
+
+        RecordingData s1 = new RecordingData("Pace",gpsX,paces,"[min/km]") ;
         statistics.add(s1);
+        RecordingData s2 = new RecordingData("Speed",gpsX,speeds,"[km/h]") ;
         statistics.add(s2);
+        RecordingData s3 = new RecordingData("Altitude",gpsX,altitudes,"[m]") ;
         statistics.add(s3);
+
         if (hrY.size()>0) {
+            ArrayList<Double> hrX = getDistancesFromTimes(hrTimes);
             RecordingData s4 = new RecordingData("Heart Rate",hrX,hrY,"[BPM]");
             statistics.add(s4);
         }
 
+        if (pressuresArray != null && pressuresArray.size()>0) {
+            ArrayList<Double> pressureX = getDistancesFromTimes(pressuresTimesArray);
+            RecordingData s5 = new RecordingData("Pressure",pressureX,pressuresArray,"[Pa]");
+            statistics.add(s5);
+        }
+
+        if (temperaturesArray != null && temperaturesArray.size()>0) {
+            ArrayList<Double> tempX = getDistancesFromTimes(temperaturesTimesArray);
+            RecordingData s6 = new RecordingData("Temperature",tempX,temperaturesArray,"[C]");
+            statistics.add(s6);
+        }
+
         return statistics;
     }
+
+    //// Setters and getters
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setStartingTime(String startingTime) {
+        this.startingTime = startingTime;
+    }
+
+    public String getName() { return this.name; }
 
     public String getDistance() {
         Double inMeter = distances.get(distances.size()-1) ;
@@ -174,21 +207,17 @@ public class Recording implements Serializable {
         return nf.format(inKm) + " km";
     }
 
-    // Returns the duration of the hike
+    public String getMapUrl() {
+        return this.mapUrl;
+    }
+
     public String getDuration() {
         return this.duration;
     }
 
-    public void setGenericInformation(String startingTime, String endingTime, int grade, String name) {
-        //this.startingTime = startingTime;
-        //this.endingTime = endingTime;
-        this.grade = grade;
-        this.name = name;
-    }
+    public String getStartingTime() { return this.startingTime; }
 
-
-
-    // MARK: - Private methods
+    //// Private methods for processing the data
 
     // This method returns an array containing all the paces.
     // The array of speeds needs to be in km/h already

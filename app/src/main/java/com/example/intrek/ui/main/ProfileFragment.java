@@ -73,6 +73,7 @@ public class ProfileFragment extends Fragment {
         fragmentView = inflater.inflate(R.layout.fragment_profile, container, false);
 
         String uid = getActivity().getIntent().getExtras().getString(UID);
+
         readUserProfile(uid);
 
         return fragmentView;
@@ -113,9 +114,12 @@ public class ProfileFragment extends Fragment {
                             final ArrayList<Double> altitudes = rec.child("altitudes").getValue(d);
                             final ArrayList<Long> hrTimes = rec.child("hrTimes").getValue(l);
                             final ArrayList<Integer> hrDataArrayList = rec.child("hrDataArrayList").getValue(i);
+                            final ArrayList<Double> temperaturesArray = rec.child("temperaturesArray").getValue(d);
+                            final ArrayList<Double> pressuresArray =  rec.child("pressuresArray").getValue(d);
+                            final ArrayList<Long> temperaturesTimesArray = rec.child("temperaturesTimesArray").getValue(l);
+                            final ArrayList<Long> pressuresTimesArray = rec.child("pressuresTimesArray").getValue(l);
 
-                            // todo: get duration
-                            final Recording recording = new Recording("",distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList);
+                            final Recording recording = new Recording("",distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList, temperaturesTimesArray,temperaturesArray,pressuresTimesArray,pressuresArray);
 
                             Double inMeter = distances.get(distances.size()-1) ;
                             Double inKm = inMeter / 1000 ;

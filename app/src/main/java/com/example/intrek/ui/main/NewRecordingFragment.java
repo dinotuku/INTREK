@@ -95,8 +95,10 @@ public class NewRecordingFragment extends Fragment {
     // Called when the user taps 'start' to lunch the activity screen.
     // Must open a new activity which will present the activity.
     private void startExercise() {
-        // Open the live activity
+        // Get the user ID
+        String uid = getActivity().getIntent().getExtras().getString(ProfileFragment.UID);
         Intent intent = new Intent(getActivity(), LiveRecordingActivity.class);
+        intent.putExtra(ProfileFragment.UID,uid) ;
         startActivity(intent);
 
     }
