@@ -1,5 +1,9 @@
 package com.example.intrek.ui.main;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,12 +17,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.intrek.DataModel.Recording;
 import com.example.intrek.DataModel.RecordingData;
+import com.example.intrek.MainActivity;
 import com.example.intrek.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,7 +33,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 // Show activity history. It will fetch data on Firebase and show all the recordings in a list view.
 public class HistoryFragment extends Fragment {
@@ -39,7 +50,8 @@ public class HistoryFragment extends Fragment {
     private String uid;
     private RecordingAdapter adapter;
     private DatabaseReference databaseRef;
-    private MyFirebaseRecordingListener mFirebaseRecordingListener;
+
+    private ArrayList<Recording> recordings;
 
     // Constructors
 
@@ -64,8 +76,7 @@ public class HistoryFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View fragmentView = inflater.inflate(R.layout.fragment_history, container, false);
 
@@ -77,18 +88,20 @@ public class HistoryFragment extends Fragment {
         adapter = new RecordingAdapter(getActivity(), R.layout.row_history);
         listView.setAdapter(adapter);
 
-        // TODO: open the corresponding recording analysis
         // Handle onClick method for each list item
         // Open RecordingAnalysis when clicked
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getContext(), "Exercise: "
-                                + ((TextView) view.findViewById(R.id.hike_name)).getText().toString()
-                                + " on " + ((TextView) view.findViewById(R.id.hike_time)).getText().toString()
-                        , Toast.LENGTH_SHORT).show();
+                Recording r = adapter.getItem(position);
+                Intent i = new Intent(getActivity(), RecordingAnalysisActivity.class);
+                i.putExtra("Recording", r);
+                i.putExtra("isFromLiveRecording",false);
+                startActivity(i);
             }
         });
+
+        recordings = ProfileFragment.recordings;
 
         return fragmentView;
     }
@@ -96,17 +109,10 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // register the listener
-        databaseRef = FirebaseDatabase.getInstance().getReference();
-        mFirebaseRecordingListener = new MyFirebaseRecordingListener();
-        databaseRef.child("profiles").child(uid).child("recordings").addValueEventListener(mFirebaseRecordingListener);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // unregister the listener to avoid memory leaks
-        databaseRef.child("profiles").child(uid).child("recording").removeEventListener(mFirebaseRecordingListener);
+        adapter.clear();
+        for (Recording rec : recordings) {
+            adapter.add(rec);
+        }
     }
 
     // Classes
@@ -141,75 +147,48 @@ public class HistoryFragment extends Fragment {
             // Get statistics
             ArrayList<RecordingData> statistics = getItem(position).getStatistics();
             String name = getItem(position).getName();
-            //String endingTime = getItem(position).getEndingTime();
+            String time = getItem(position).getStartingTime();
             String duration = getItem(position).getDuration();
             String distance = getItem(position).getDistance();
             String pace = statistics.get(0).getAverage();
-            String elev = String.valueOf(statistics.get(3).getMaxY() - statistics.get(3).getMinY());
+            String elev = String.format(Locale.US, "%.2f [m]", getItem(position).getElevationGain());
 
-            // Show statistics
+            // Show statistics and map
             ((TextView) row.findViewById(R.id.hike_name)).setText(name);
-            //((TextView) row.findViewById(R.id.hike_time)).setText(endingTime);
+            ((TextView) row.findViewById(R.id.hike_time)).setText(time);
             ((TextView) row.findViewById(R.id.hike_duration)).setText(duration);
             ((TextView) row.findViewById(R.id.hike_distance)).setText(distance);
             ((TextView) row.findViewById(R.id.hike_pace)).setText(pace);
             ((TextView) row.findViewById(R.id.hike_elev_gain)).setText(elev);
-
-            // TODO: update the small map image (have to save it to firebase first)
+            new DownloadImageTask((ImageView) row.findViewById(R.id.mapImage)).execute(getItem(position).getMapUrl());
 
             return row;
         }
     }
 
-    // Fetch data from Firebase
-    private class MyFirebaseRecordingListener implements ValueEventListener {
+    // This inner class is used to download an image from Internet
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
 
-        // Default methods
-
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            // Otherwise it will add data every time we listens for events
-            adapter.clear();
-
-            // Loop over every recording
-            for (final DataSnapshot rec : dataSnapshot.getChildren()) {
-                // For simply getting arrays using getValue
-                GenericTypeIndicator<ArrayList<Long>> l = new GenericTypeIndicator<ArrayList<Long>>() {
-                };
-                GenericTypeIndicator<ArrayList<Double>> d = new GenericTypeIndicator<ArrayList<Double>>() {
-                };
-                GenericTypeIndicator<ArrayList<Integer>> i = new GenericTypeIndicator<ArrayList<Integer>>() {
-                };
-
-                // Get array data
-                final ArrayList<Long> distancesTimes = rec.child("distancesTimes").getValue(l);
-                final ArrayList<Double> distances = rec.child("distances").getValue(d);
-                final ArrayList<Long> speedsTimes = rec.child("speedsTimes").getValue(l);
-                final ArrayList<Double> speeds = rec.child("speeds").getValue(d);
-                final ArrayList<Double> altitudes = rec.child("altitudes").getValue(d);
-                final ArrayList<Long> hrTimes = rec.child("hrTimes").getValue(l);
-                final ArrayList<Integer> hrDataArrayList = rec.child("hrDataArrayList").getValue(i);
-
-                // todo: get duration
-                // Create a Recording object
-                final Recording recording = new Recording("", distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList);
-
-                // Get generic information about the hike
-                String startingTime = rec.child("startingTime").getValue().toString();
-                String endingTime = rec.child("endingTime").getValue().toString();
-                int grade = rec.child("grade").getValue(int.class);
-                String name = rec.child("name").getValue().toString();
-
-                // Save generic information to the Recording object
-                recording.setGenericInformation(startingTime, endingTime, grade, name);
-
-                adapter.add(recording);
-            }
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
         }
 
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            Log.v(TAG, databaseError.toString());
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
         }
     }
 }
