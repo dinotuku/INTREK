@@ -51,7 +51,6 @@
             android:name=".ui.main.TypePickerPopUp"
             android:theme="@style/AppTheme.CustomTheme" />
         <activity android:name=".SensorTile.DeviceScanActivity" />
-        <activity android:name=".SensorTile.BlePopUp" />
 
         <service android:name=".WearService">
             <intent-filter>

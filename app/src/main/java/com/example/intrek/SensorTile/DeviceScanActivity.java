@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,6 +52,13 @@ public class DeviceScanActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         mHandler = new Handler();
 
+        // Set the dimensions of this new activity (it's a pop-up)
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        int width = dm.widthPixels;
+        int height = dm.heightPixels;
+        getWindow().setLayout((int) (width*.8), (int) (height*.6));
+
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -79,7 +87,7 @@ public class DeviceScanActivity extends ListActivity {
         }
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.sensortile, menu);
         if (!mScanning) {
@@ -107,7 +115,7 @@ public class DeviceScanActivity extends ListActivity {
                 break;
         }
         return true;
-    }
+    }*/
 
     @Override
     protected void onResume() {
