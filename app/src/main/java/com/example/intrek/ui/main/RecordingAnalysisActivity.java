@@ -10,12 +10,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -43,10 +46,9 @@ import java.util.List;
 public class RecordingAnalysisActivity extends AppCompatActivity {
 
     private Recording recording ;
-
-    MapView mapView;
-    GoogleMap map;
-
+    private String uid ;
+    private ListView listView;
+    private boolean isFromLiveRecording;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,123 +57,68 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
 
         // 1. Obtain the recording
         recording = (Recording) getIntent().getSerializableExtra("Recording");
+        uid = getIntent().getStringExtra(ProfileFragment.UID);
 
         // 2. Set the list view
         setListView();
-    }
 
-    // This method is here to set the statistics list view
-    private void setListView(){
-        ListView listView = findViewById(R.id.statisticsListView);
-
-        // Set the adapter to the created adapter
-        /*
-        StatisticListViewAdapter adapter = new StatisticListViewAdapter(RecordingAnalysisActivity.this,R.layout.row_time_statistics);
-        listView.setAdapter(adapter);
-        // Add the model to the cells
-        for (RecordingData rd: recording.getStatistics()) {
-            adapter.add(rd);
+        // 3. Set the view properly
+        isFromLiveRecording = getIntent().getBooleanExtra("isFromLiveRecording", true) ;
+        if (!isFromLiveRecording) {
+            // Disable the save button
+            Button saveButton = findViewById(R.id.SaveButton);
+            saveButton.setVisibility(View.INVISIBLE);
+            saveButton.setEnabled(false);
         }
 
-         */
 
+    }
+
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    public void saveButtonTapped(View view) {
+        // 1. obtain the name
+        EditText ed = (EditText) listView.getChildAt(0).findViewById(R.id.HikeNameEditText) ;
+        String text = ed.getText().toString();
+        if (TextUtils.isEmpty(text)) {
+            ed.setError("Name required.");
+        } else {
+            // set name
+            recording.setName(text);
+            // save to Firebase
+            recording.saveToFirebase(uid);
+        }
+    }
+
+    // This method is here to set the list view.
+    // The list view will present all the information about the hike
+    // It has 2 different layout types
+    private void setListView(){
+        listView = findViewById(R.id.statisticsListView);
         int[] resources = new int[] {R.layout.row_first_statistic, R.layout.row_time_statistics} ;
         ArrayList<Object> list = new ArrayList<>() ;
         list.add("nothing") ;
-        for (RecordingData rd: recording.getStatistics()) {
-            list.add(rd);
-        }
+        list.addAll(recording.getStatistics());
         AnalysisListAdapter myCustomAdapter = new AnalysisListAdapter(RecordingAnalysisActivity.this,resources,list);
         listView.setAdapter(myCustomAdapter);
-
-
     }
 
-    private class StatisticListViewAdapter extends ArrayAdapter<RecordingData> {
 
-        public StatisticListViewAdapter(@NonNull Context context, int resource) {
-            super(context, resource);
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            // Reference to the row View
-            View row = convertView;
-
-            if (row == null) {
-                // Inflate it from layout
-                row = LayoutInflater.from(getContext()).inflate(R.layout.row_time_statistics, parent, false);
-            }
-
-
-            // And set the row with the data
-            RecordingData data = getItem(position);
-
-            // Set the text
-            TextView tx = row.findViewById(R.id.statisticNameTextView);
-            tx.setText(data.getName());
-
-            // Set the plot view
-            XYPlot plot = row.findViewById(R.id.statisticGrap);
-            configurePlot(plot, data.getMaxY());
-            setPlot(plot,data,8);
-
-            // Set the average value of
-            TextView aveTv = row.findViewById(R.id.averageValueTextView) ;
-            aveTv.setText(data.getAverage());
-
-            return row ;
-        }
-
-        // This function set the plot for the given inputs.
-        private void configurePlot(XYPlot plot, double maxY) {
-            //// Set the colors
-            // Get background color from Theme
-            TypedValue typedValue = new TypedValue();
-            getTheme().resolveAttribute(android.R.attr.windowBackground, typedValue, true);
-            int backgroundColor = typedValue.data;
-            // Set background colors
-            plot.setPlotMargins(0, 0, 0, 0);
-            plot.getBorderPaint().setColor(backgroundColor);
-            plot.getBackgroundPaint().setColor(backgroundColor);
-            plot.getGraph().getBackgroundPaint().setColor(backgroundColor);
-            plot.getGraph().getGridBackgroundPaint().setColor(backgroundColor);
-            // Set the grid color
-            plot.getGraph().getRangeGridLinePaint().setColor(Color.DKGRAY);
-            plot.getGraph().getDomainGridLinePaint().setColor(Color.DKGRAY);
-            // Set the origin axes colors
-            plot.getGraph().getRangeOriginLinePaint().setColor(Color.DKGRAY);
-            plot.getGraph().getDomainOriginLinePaint().setColor(Color.DKGRAY);
-
-            //// Last settings of the plot
-            // Set the XY axis boundaries and step values
-            plot.getGraph().setLineLabelEdges(XYGraphWidget.Edge.BOTTOM, XYGraphWidget.Edge.LEFT);
-            plot.getLegend().setVisible(false);
-            plot.setRangeBoundaries(0,1.3*maxY, BoundaryMode.FIXED);
-        }
-
-        private void setPlot(XYPlot plot, RecordingData data, int strokeWidth) {
-            LineAndPointFormatter formatter = new LineAndPointFormatter(Color.RED, Color.TRANSPARENT, Color.TRANSPARENT, null);
-            formatter.getLinePaint().setStrokeWidth(strokeWidth);
-            SimpleXYSeries series = new SimpleXYSeries(data.getTimes(),data.getValues(),data.getName());
-            plot.clear();
-            plot.addSeries(series,formatter);
-            plot.redraw();
-        }
-    }
-
+    // This inner class is the custom ArrayAdapter used to display a ListView with 2 differnet layout types.
     private class AnalysisListAdapter<T> extends ArrayAdapter<T> {
 
         private LayoutInflater mInflater;
-        private int[] mLayoutResourceIds;
 
 
         public AnalysisListAdapter(Context context, int[] resources, List<T> objects) {
             super(context, resources[1], objects);
-            // mInflater = LayoutInflater.from(getContext()) ;
             mInflater = (LayoutInflater) getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-            mLayoutResourceIds = resources;
         }
 
         @Override
@@ -188,7 +135,6 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
 
             View row = convertView;
-            int type = getItemViewType(position);
 
             if (position == 0) {
                 if (row == null) {
@@ -211,9 +157,6 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
 
                 // Set the text
                 TextView tx = row.findViewById(R.id.statisticNameTextView);
-                if (tx == null) {
-                    Log.i("A", String.valueOf(row)) ;
-                }
                 tx.setText(data.getName());
 
                 // Set the plot view
@@ -224,10 +167,7 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
                 // Set the average value of
                 TextView aveTv = row.findViewById(R.id.averageValueTextView) ;
                 aveTv.setText(data.getAverage());
-
-
             }
-
             return row ;
         }
 
@@ -241,16 +181,23 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
             TextView timeTV = row.findViewById(R.id.timeTextView);
             TextView elevationTV = row.findViewById(R.id.elevationTextView);
 
-            // Set their text to something
+            // Set their text
             distanceTV.setText(recording.getDistance());
             avePaceTV.setText("TODO");
             timeTV.setText(recording.getDuration());
             elevationTV.setText("TODO");
 
+            // Set eventually the name
+            if (!isFromLiveRecording) {
+                // Set the text of the editText
+                EditText ed = row.findViewById(R.id.HikeNameEditText) ;
+                ed.setText(recording.getName(),TextView.BufferType.EDITABLE);
+                ed.setEnabled(false);
+            }
+
             // plot the map's data
             String url = "https://maps.googleapis.com/maps/api/staticmap?center=40.714%2c%20-73.998&zoom=12&size=400x400&key=AIzaSyCjDSiAyIqt1YApD1rCTgUTAFeO6Udcixs" ;
             new DownloadImageTask((ImageView) row.findViewById(R.id.mapImageView)).execute(recording.getMapUrl());
-
 
         }
 
@@ -292,6 +239,7 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
         }
     }
 
+    // This inner class is used to download an image from Internet
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
 

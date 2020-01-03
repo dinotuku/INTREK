@@ -1,5 +1,6 @@
 package com.example.intrek.ui.main;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -61,25 +62,24 @@ public class HistoryFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.fragment_history, container, false);
 
         uid = getActivity().getIntent().getExtras().getString(ProfileFragment.UID);
-
         listView = fragmentView.findViewById(R.id.history_list);
         adapter = new RecordingAdapter(getActivity(), R.layout.row_history);
         listView.setAdapter(adapter);
 
-        // TODO: open the corresponding summary activity
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getContext(), "Exercise: "
-                                + ((TextView) view.findViewById(R.id.hike_name)).getText().toString()
-                                + " on " + ((TextView) view.findViewById(R.id.hike_time)).getText().toString()
-                        , Toast.LENGTH_SHORT).show();
+
+                Recording r = adapter.getItem(position);
+                Intent i = new Intent(getActivity(), RecordingAnalysisActivity.class);
+                i.putExtra("Recording", r);
+                i.putExtra("isFromLiveRecording",false);
+                startActivity(i);
             }
         });
 
@@ -124,20 +124,19 @@ public class HistoryFragment extends Fragment {
 
             ArrayList<RecordingData> statistics = getItem(position).getStatistics();
             String name = getItem(position).getName();
-            //String endingTime = getItem(position).getEndingTime();
+            String time = getItem(position).getStartingTime();
             String duration = getItem(position).getDuration();
             String distance = getItem(position).getDistance();
             String pace = statistics.get(0).getAverage();
             String elev = String.valueOf(statistics.get(3).getMaxY() - statistics.get(3).getMinY());
 
             ((TextView) row.findViewById(R.id.hike_name)).setText(name);
-            //((TextView) row.findViewById(R.id.hike_time)).setText(endingTime);
+            ((TextView) row.findViewById(R.id.hike_time)).setText(time);
             ((TextView) row.findViewById(R.id.hike_duration)).setText(duration);
             ((TextView) row.findViewById(R.id.hike_distance)).setText(distance);
             ((TextView) row.findViewById(R.id.hike_pace)).setText(pace);
             ((TextView) row.findViewById(R.id.hike_elev_gain)).setText(elev);
 
-            // TODO: update the small map image (have to save it to firebase first)
 
             return row;
         }
@@ -151,6 +150,7 @@ public class HistoryFragment extends Fragment {
             adapter.clear();
 
             for (final DataSnapshot rec : dataSnapshot.getChildren()) {
+
                 GenericTypeIndicator<ArrayList<Long>> l = new GenericTypeIndicator<ArrayList<Long>>() {};
                 GenericTypeIndicator<ArrayList<Double>> d = new GenericTypeIndicator<ArrayList<Double>>() {};
                 GenericTypeIndicator<ArrayList<Integer>> i = new GenericTypeIndicator<ArrayList<Integer>>() {};
@@ -162,17 +162,18 @@ public class HistoryFragment extends Fragment {
                 final ArrayList<Double> altitudes = rec.child("altitudes").getValue(d);
                 final ArrayList<Long> hrTimes = rec.child("hrTimes").getValue(l);
                 final ArrayList<Integer> hrDataArrayList = rec.child("hrDataArrayList").getValue(i);
-
-                // todo: get duration
-                final Recording recording = new Recording("",distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList);
+                final ArrayList<Double> temperaturesArray = rec.child("temperaturesArray").getValue(d);
+                final ArrayList<Double> pressuresArray =  rec.child("pressuresArray").getValue(d);
+                final ArrayList<Long> temperaturesTimesArray = rec.child("temperaturesTimesArray").getValue(l);
+                final ArrayList<Long> pressuresTimesArray = rec.child("pressuresTimesArray").getValue(l);
+                final Recording recording = new Recording("",distancesTimes, distances, speedsTimes, speeds, altitudes, hrTimes, hrDataArrayList, temperaturesTimesArray,temperaturesArray,pressuresTimesArray,pressuresArray);
 
                 // Generic information about the hike
                 String startingTime = rec.child("startingTime").getValue().toString();
-                String endingTime = rec.child("endingTime").getValue().toString();
-                int grade = rec.child("grade").getValue(int.class);
                 String name = rec.child("name").getValue().toString();
-
-                recording.setGenericInformation(startingTime, endingTime, grade, name);
+                String mapUrl = rec.child("mapUrl").getValue().toString();
+                String duration = rec.child("duration").getValue().toString();
+                recording.setGenericInformation(startingTime, name, mapUrl, duration);
 
                 adapter.add(recording);
             }

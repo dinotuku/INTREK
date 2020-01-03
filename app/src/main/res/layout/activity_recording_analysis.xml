@@ -7,10 +7,11 @@
     tools:context=".ui.main.RecordingAnalysisActivity">
 
     <Button
-        android:id="@+id/button4"
+        android:id="@+id/SaveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
+        android:onClick="saveButtonTapped"
         android:text="Save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
@@ -31,6 +32,7 @@ import com.example.intrek.DataModel.Recording;
 import com.example.intrek.DataModel.XYPlotSeriesList;
 import com.example.intrek.Managers.GPSManager;
 import com.example.intrek.Managers.HRManager;
+import com.example.intrek.Managers.MicrocontrollerManager;
 import com.example.intrek.R;
 import com.example.intrek.WearService;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -42,7 +44,11 @@ import com.google.maps.android.SphericalUtil;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import static com.example.intrek.R.id.HRPlot;
 
@@ -57,15 +63,18 @@ public class LiveRecordingActivity extends AppCompatActivity {
     private TextView speedTextView;
     private TextView distanceTextView;
     private TextView pressureTextView;
+    private TextView temperatureTextView;
     private TextView dataPointsTextView;
     private TextView altitudeTextView;
 
     private long timerValueWhenPaused = 0;
     private boolean isPaused = false;
-    private int heartRateWatch = 0;
-    private XYPlotSeriesList xyPlotSeriesList;
+    // https://stackoverflow.com/questions/5369682/how-to-get-current-time-and-date-in-android
+    private String startingTime ;
     private GPSManager gpsManager;
     private HRManager hrManager ;
+    private MicrocontrollerManager microcontrollerManager ;
+
 
     // For the location
     private int i = 0 ;
@@ -85,6 +94,12 @@ public class LiveRecordingActivity extends AppCompatActivity {
     private ArrayList<Integer> hrDataArrayList = new ArrayList<>();
     private ArrayList<Long> hrTimes = new ArrayList<>();
     private ArrayList<Double> altitudes = new ArrayList<>();
+
+    // Arrays for the microcontroller
+    private ArrayList<Double> temperaturesArray = new ArrayList<>();
+    private ArrayList<Double> pressuresArray = new ArrayList<>();
+    private ArrayList<Long> temperaturesTimesArray = new ArrayList<>();
+    private ArrayList<Long> pressuresTimesArray = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +130,12 @@ public class LiveRecordingActivity extends AppCompatActivity {
         hrManager = new HRManager(this, hrTextView) ;
         hrManager.setToPlot(heartRatePlot,hrDataArrayList,hrTimes);
 
-        // 4. Start all recordings !
+        // 4. Add the microcontroller manager
+        microcontrollerManager = new MicrocontrollerManager(this, temperatureTextView, pressureTextView,temperaturesTimesArray,temperaturesArray,pressuresTimesArray,pressuresArray);
+
+        // 5. Start all recordings !
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault());
+        startingTime = sdf.format(new Date());
         resume();
     }
 
@@ -135,6 +155,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
         pauseButton.setText("Pause");
         gpsManager.startRecording();
         hrManager.startRecording();
+        microcontrollerManager.startRecording();
         isPaused = false ;
     }
 
@@ -145,6 +166,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
         pauseButton.setText("Resume");
         gpsManager.stopRecording();
         hrManager.stopRecording();
+        microcontrollerManager.startRecording();
         isPaused = true ;
     }
     //endregion
@@ -172,14 +194,19 @@ public class LiveRecordingActivity extends AppCompatActivity {
     // Open the recording manager to view analysis of the hike
     public void finishRecordingButtonTapped(View view) {
         pause();
+
         // 1. Create the recording
         String duration = (String) this.timerTextView.getText();
-        Recording r = new Recording(duration,distanceTimes,distances,speedsTimes,speeds,altitudes,hrTimes,hrDataArrayList);
+        Recording r = new Recording(duration,distanceTimes,distances,speedsTimes,speeds,altitudes,hrTimes,hrDataArrayList,temperaturesTimesArray, temperaturesArray, pressuresTimesArray, pressuresArray);
         r.constructURLFromLocations(averagedLocations);
+        r.setStartingTime(startingTime);
+
 
         // 2. Send it to the new activity
+        String uid = getIntent().getStringExtra(ProfileFragment.UID);
         Intent i = new Intent(LiveRecordingActivity.this, RecordingAnalysisActivity.class);
         i.putExtra("Recording", r);
+        i.putExtra(ProfileFragment.UID,uid);
         startActivity(i);
     }
     //endregion
