@@ -96,6 +96,7 @@ public class GPSManager {
 
     public void setArraysToCollectData(ArrayList<Long> locationsTimes, ArrayList<LatLng> locations, ArrayList<LatLng> averagedLocations, ArrayList<Long> distanceTimes, ArrayList<Double> distances, ArrayList<Long> speedsTimes, ArrayList<Double> speeds, ArrayList<Double> altitudes) {
         this.isCollectingData = true ;
+
         this.locationsTimes = locationsTimes;
         this.locations = locations;
         this.averagedLocations = averagedLocations;
@@ -169,11 +170,15 @@ public class GPSManager {
                 LatLng l = locations.get(locations.size()-1-j);
                 lats += l.latitude ;
                 longs += l.longitude ;
-                alts += altitudes.get(altitudes.size()-1-j) ;
+                if (isCollectingData) {
+                    alts += altitudes.get(altitudes.size()-1-j) ;
+                }
             }
             averagedLocations.add(new LatLng(lats/N_pos, longs/N_pos));
-            averagedAltitudes.add(alts/N_pos) ;
-            updateElevationGain();
+            if (isCollectingData) {
+                averagedAltitudes.add(alts/N_pos) ;
+                updateElevationGain();
+            }
 
             double dist = SphericalUtil.computeLength(averagedLocations);
             displayDistance(dist);
@@ -201,7 +206,8 @@ public class GPSManager {
         if (averagedAltitudes.size()>1) {
             int i = averagedAltitudes.size()-1;
             double deltaZ = averagedAltitudes.get(i) - averagedAltitudes.get(i-1) ;
-            currentGain += deltaZ ;
+            if (deltaZ>0)
+                currentGain += deltaZ ;
         }
     }
 

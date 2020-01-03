@@ -250,10 +250,11 @@ public class Recording implements Serializable {
     private ArrayList<Double> getPace() {
         ArrayList<Double> toReturn = new ArrayList<>();
         for (Double speed: speeds){
-            if (speed >= 4) {
-                toReturn.add(60/speed);
+            Double pace = 60 / speed ;
+            if (pace > 20) {
+                toReturn.add(20.0);
             } else {
-                toReturn.add(10.0);
+                toReturn.add(pace);
             }
         }
         return toReturn;
