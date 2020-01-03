@@ -29,6 +29,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +46,9 @@ public class HistoryFragment extends Fragment {
     private RecordingAdapter adapter;
     private DatabaseReference databaseRef;
     private MyFirebaseRecordingListener mFirebaseRecordingListener;
+
+    NumberFormat nf = new DecimalFormat("##.##");
+
 
     public HistoryFragment() {
         // Required empty public constructor
@@ -128,7 +133,9 @@ public class HistoryFragment extends Fragment {
             String duration = getItem(position).getDuration();
             String distance = getItem(position).getDistance();
             String pace = statistics.get(0).getAverage();
-            String elev = String.valueOf(statistics.get(3).getMaxY() - statistics.get(3).getMinY());
+            String elev = nf.format(getItem(position).getElevationGain()) + " [m]";
+
+
 
             ((TextView) row.findViewById(R.id.hike_name)).setText(name);
             ((TextView) row.findViewById(R.id.hike_time)).setText(time);
@@ -173,7 +180,8 @@ public class HistoryFragment extends Fragment {
                 String name = rec.child("name").getValue().toString();
                 String mapUrl = rec.child("mapUrl").getValue().toString();
                 String duration = rec.child("duration").getValue().toString();
-                recording.setGenericInformation(startingTime, name, mapUrl, duration);
+                Double elevationGain = Double.valueOf(rec.child("elevationGain").getValue().toString()) ;
+                recording.setGenericInformation(startingTime, name, mapUrl, duration, elevationGain);
 
                 adapter.add(recording);
             }
