@@ -113,7 +113,6 @@ public class NewRecordingFragment extends Fragment {
                     connexionTile();
                     Log.e("AddressDevice",mDeviceAddress);
                     Intent gattServiceIntent = new Intent(getActivity(), BluetoothLeService.class);
-                    bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
                     mBluetoothLeService.connect(mDeviceAddress);
                     switchTile.setText("Connected");
                     mConnected = true;
@@ -207,32 +206,6 @@ public class NewRecordingFragment extends Fragment {
     }
 
 
-    //FOR RECEIVE DATA
-    // Handles various events fired by the Service.
-    // ACTION_GATT_CONNECTED: connected to a GATT server.
-    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
-    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
-    // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
-    //                        or notification operations.
-    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                mConnected = true;
-                switchTile.setText(R.string.connected);
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                mConnected = false;
-                switchTile.setText(R.string.disconnected);
-            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
-                // Show all the supported services and characteristics on the user interface.
-                //displayGattServices(mBluetoothLeService.getSupportedGattServices());
-            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                displayData(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
-            }
-        }
-    };
-
     private void displayData(byte[] tileData){
         Log.d("TAG", "Temperature format UINT16.");
         Log.d("TAG", "Pressure format UINT32.");
@@ -240,33 +213,6 @@ public class NewRecordingFragment extends Fragment {
         final int pressure = NumberConversion.bytesToInt32(tileData,2);
         Log.d("TAG", String.format("Received Temperature: %d", temperature));
         Log.d("TAG", String.format("Received Pressure: %d", pressure));
-    }
-
-    // Code to manage Service lifecycle.
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-            if (!mBluetoothLeService.initialize()) {
-                Log.e("TAG", "Unable to initialize Bluetooth");
-            }
-            // Automatically connects to the device upon successful start-up initialization.
-            mBluetoothLeService.connect(mDeviceAddress);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mBluetoothLeService = null;
-        }
-
-
-    };
-
-    public class LocalBinder extends Binder {
-        BluetoothLeService getService() {
-            return BluetoothLeService.this;
-        }
     }
 
 }
