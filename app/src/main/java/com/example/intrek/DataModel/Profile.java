@@ -22,8 +22,12 @@ public class Profile implements Serializable {
     public Double totalDistance;
     public Double totalElevation;
     public Double farthestHike;
-    public Double longestHike;
+    public String longestHike;
     public Double highestElevation;
+
+    public String farthestHikeDate;
+    public String longestHikeDate;
+    public String highestElevationDate;
 
     // Constructors
 

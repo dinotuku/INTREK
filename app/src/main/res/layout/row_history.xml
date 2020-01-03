@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="150dp"
     android:orientation="vertical">
 
     <Space
@@ -20,13 +20,12 @@
             android:layout_weight="1.5" />
 
         <ImageView
-            android:id="@+id/exerciseTypeIcon"
+            android:id="@+id/mapImage"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="6"
             android:adjustViewBounds="true"
-            android:cropToPadding="false"
-            app:srcCompat="@drawable/example_map" />
+            android:cropToPadding="false" />
 
         <Space
             android:layout_width="0dp"
@@ -43,14 +42,12 @@
                 android:id="@+id/hike_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="My First Hike"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
             <TextView
                 android:id="@+id/hike_time"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="December 31, 2019 at 11:59 PM" />
+                android:layout_height="wrap_content" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -69,8 +66,7 @@
                     android:id="@+id/hike_duration"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="22:22" />
+                    android:layout_weight="1" />
             </LinearLayout>
 
             <LinearLayout
@@ -90,8 +86,7 @@
                     android:id="@+id/hike_distance"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="10 km" />
+                    android:layout_weight="1" />
             </LinearLayout>
 
             <LinearLayout
@@ -111,8 +106,7 @@
                     android:id="@+id/hike_pace"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="9" />
+                    android:layout_weight="1" />
             </LinearLayout>
 
             <LinearLayout
@@ -132,8 +126,7 @@
                     android:id="@+id/hike_elev_gain"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="40 m" />
+                    android:layout_weight="1" />
             </LinearLayout>
 
         </LinearLayout>

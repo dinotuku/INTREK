@@ -52,7 +52,7 @@ public class EmailActivity extends AppCompatActivity {
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkingEmail(mEmailInputField.getText().toString(), UUID.randomUUID().toString().substring(0, 8));
+                checkingEmail(mEmailInputField.getText().toString(), UUID.randomUUID().toString().substring(0, 24));
             }
         });
 

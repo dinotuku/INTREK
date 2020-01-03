@@ -43,6 +43,13 @@ public class GPSManager {
      */
     private long initialTime = System.currentTimeMillis() ;
     private int i = 0 ;
+    private double currentGain = 0.0  ;
+
+    // This array is only used here and
+    private ArrayList<Double> averagedAltitudes = new ArrayList<>();
+
+
+    // Arrays to be saved later
     private ArrayList<Long> locationsTimes ;
     private ArrayList<LatLng> locations = new ArrayList<>() ;
     private ArrayList<LatLng> averagedLocations = new ArrayList<>() ;
@@ -117,55 +124,71 @@ public class GPSManager {
 
     // This method is called everytime a new location has been obtained.
     private void onLocationChanged(Location location) {
-        int N_pos = 5 ; i ++ ;
+        int N_pos = 5 ;
 
         // 1. Add the data to be process / save (optional)
-        if (isCollectingData) {
-            locationsTimes.add(System.currentTimeMillis()-initialTime);
-        }
         LatLng newPoint = new LatLng(location.getLatitude(),location.getLongitude());
-        locations.add(newPoint);
-        int numberOfPoints = locations.size();
-        if (hasMapCallback) {
-            this.callback.newPointAvailable(newPoint);
-        }
-
-        if (numberOfPoints>N_pos) {
-            // 2. Average the location over N_pos last values and compute the distance
-            double lats = 0.0 ; double longs = 0.0 ;
-            for (int j=0; j < N_pos; j++) {
-                LatLng l = locations.get(numberOfPoints-1-j);
-                lats += l.latitude ;
-                longs += l.longitude ;
-            }
-            LatLng averagedValue = new LatLng(lats/N_pos, longs/N_pos);
-            averagedLocations.add(averagedValue);
-            double dist = SphericalUtil.computeLength(averagedLocations);
-            displayDistance(dist);
-
-            if (isCollectingData) {
-                distanceTimes.add(System.currentTimeMillis()-initialTime);
-                distances.add(dist);
-            }
-        }
-
-        // 3. Get the speed and the altitude
         double speed = location.getSpeed() * 3.6;
         double altitude = location.getAltitude();
-        displaySpeed(speed);
-        displayAltitude(altitude);
-        displayDataPoints();
+
+        locations.add(newPoint);
         if (isCollectingData) {
+            locationsTimes.add(System.currentTimeMillis()-initialTime);
             speeds.add(speed);
             altitudes.add(altitude);
             speedsTimes.add(System.currentTimeMillis()-initialTime);
         }
 
-        // 4. Callback for position
+        if (hasMapCallback) {
+            this.callback.newPointAvailable(newPoint);
+        }
+
+        displaySpeed(speed);
+        displayAltitude(altitude);
+        displayDataPoints();
+
+        // 2. Average the location over N_pos last values and compute the distance
+
+        if (locations.size()>N_pos) {
+            double lats = 0.0 ; double longs = 0.0 ; double alts = 0.0 ;
+            for (int j=0; j < N_pos; j++) {
+                LatLng l = locations.get(locations.size()-1-j);
+                lats += l.latitude ;
+                longs += l.longitude ;
+                alts += altitudes.get(altitudes.size()-1-j) ;
+            }
+            averagedLocations.add(new LatLng(lats/N_pos, longs/N_pos));
+            averagedAltitudes.add(alts/N_pos) ;
+            updateElevationGain();
+
+            double dist = SphericalUtil.computeLength(averagedLocations);
+            displayDistance(dist);
+            if (isCollectingData) {
+                distanceTimes.add(System.currentTimeMillis()-initialTime);
+                distances.add(dist);
+            }
+
+        }
+
+
+
     }
 
     public Double getDistance() {
         return averagedLocations.size() > 0 ? SphericalUtil.computeLength(averagedLocations) : 0.0 ;
+    }
+
+    public Double getElevationGain() {
+        return currentGain;
+    }
+
+    // Updates the value of the elevation gain using the last 2 values of the average altitudes array
+    private void updateElevationGain() {
+        if (averagedAltitudes.size()>1) {
+            int i = averagedAltitudes.size()-1;
+            double deltaZ = averagedAltitudes.get(i) - averagedAltitudes.get(i-1) ;
+            currentGain += deltaZ ;
+        }
     }
 
     private void displayDistance(Double dist) {
@@ -190,7 +213,7 @@ public class GPSManager {
 
     private void displayAltitude(Double alt) {
         NumberFormat nf = new DecimalFormat("##.##");
-        String s = nf.format(alt) + " [m]";
+        String s = nf.format(currentGain) + " [m]";
         altitudeTextView.setText(s);
     }
 
