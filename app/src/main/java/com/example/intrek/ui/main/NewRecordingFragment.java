@@ -1,27 +1,39 @@
 package com.example.intrek.ui.main;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.os.Binder;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Switch;
+import android.widget.Toast;
 
 import com.example.intrek.BuildConfig;
 import com.example.intrek.R;
-import com.example.intrek.SensorTile.BlePopUp;
+import com.example.intrek.SensorTile.BluetoothLeService;
 import com.example.intrek.SensorTile.DeviceScanActivity;
+import com.example.intrek.SensorTile.NumberConversion;
 import com.example.intrek.WearService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static android.content.Context.BIND_AUTO_CREATE;
 
 public class NewRecordingFragment extends Fragment {
 
@@ -32,6 +44,10 @@ public class NewRecordingFragment extends Fragment {
     public static final String NEW_INDEX = "newIndex";
     public static final ArrayList<String> ACTIVITY_TYPES = new ArrayList<String>(Arrays.asList("Running","Mountain Hiking","City Hiking"));
     public static final String SELECTED_INDEX = "SelectedIndex";
+    public static final String DEVICE_NOT_SUPPORTED = "Device not supported";
+    private String mDeviceAddress;
+    private BluetoothLeService mBluetoothLeService;
+    private boolean mConnected = false;
 
     // MARK: - Private variables
 
@@ -39,7 +55,8 @@ public class NewRecordingFragment extends Fragment {
     private static final int TYPE_REQUEST_TILE = 2;
     private View fragmentView;
     private int selectedType = 0 ;
-    private Button typeButton;
+    private Button typeButton,tileButton;
+    private Switch switchTile;
 
 
     public NewRecordingFragment() {
@@ -79,7 +96,7 @@ public class NewRecordingFragment extends Fragment {
             }
         });
 
-        Button tileButton = fragmentView.findViewById(R.id.buttonTile);
+        tileButton = fragmentView.findViewById(R.id.buttonTile);
         tileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,6 +105,28 @@ public class NewRecordingFragment extends Fragment {
             }
         });
 
+        switchTile = fragmentView.findViewById(R.id.TileSwitch);
+        switchTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (switchTile.isChecked()){
+                    connexionTile();
+                    Log.e("AddressDevice",mDeviceAddress);
+                    Intent gattServiceIntent = new Intent(getActivity(), BluetoothLeService.class);
+                    bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+                    mBluetoothLeService.connect(mDeviceAddress);
+                    switchTile.setText("Connected");
+                    mConnected = true;
+
+                }else{
+                    mBluetoothLeService.disconnect();
+                    switchTile.setText("Disconnected");
+                    mConnected = false;
+
+                }
+
+            }
+        });
         updateTypeButtonText();
 
         return fragmentView;
@@ -101,11 +140,22 @@ public class NewRecordingFragment extends Fragment {
         if (requestCode == TYPE_REQUEST && resultCode == AppCompatActivity.RESULT_OK) {
             selectedType = data.getIntExtra(TypePickerPopUp.NEW_INDEX,0);
             updateTypeButtonText();
-            Log.e("Test","Type");
         }
         if (requestCode == TYPE_REQUEST_TILE && resultCode == AppCompatActivity.RESULT_OK) {
             String deviceName = data.getStringExtra(DeviceScanActivity.DEVICE_NAME);
-            Log.e("Test","Device: "+ deviceName);
+            if (deviceName!=null){
+                mDeviceAddress = data.getStringExtra(DeviceScanActivity.DEVICE_ADDRESS);
+                tileButton.setText(deviceName);
+                tileButton.setBackgroundColor(0XFF00A000);
+                switchTile.setVisibility(View.VISIBLE);
+
+            }else{
+                Toast.makeText(getActivity(), DEVICE_NOT_SUPPORTED, Toast.LENGTH_SHORT).show();
+                tileButton.setText("Connexion");
+                tileButton.setBackgroundColor(Color.LTGRAY);
+                switchTile.setVisibility(View.INVISIBLE);
+            }
+
         }
     }
 
@@ -150,4 +200,74 @@ public class NewRecordingFragment extends Fragment {
     private void updateTypeButtonText() {
         typeButton.setText(ACTIVITY_TYPES.get(this.selectedType));
     }
+
+    private boolean connexionTile(){
+
+        return true;
+    }
+
+
+    //FOR RECEIVE DATA
+    // Handles various events fired by the Service.
+    // ACTION_GATT_CONNECTED: connected to a GATT server.
+    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+    // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
+    //                        or notification operations.
+    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+                mConnected = true;
+                switchTile.setText(R.string.connected);
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                mConnected = false;
+                switchTile.setText(R.string.disconnected);
+            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                // Show all the supported services and characteristics on the user interface.
+                //displayGattServices(mBluetoothLeService.getSupportedGattServices());
+            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+                displayData(intent.getByteArrayExtra(BluetoothLeService.EXTRA_DATA));
+            }
+        }
+    };
+
+    private void displayData(byte[] tileData){
+        Log.d("TAG", "Temperature format UINT16.");
+        Log.d("TAG", "Pressure format UINT32.");
+        final int temperature = NumberConversion.bytesToInt16(tileData,6);
+        final int pressure = NumberConversion.bytesToInt32(tileData,2);
+        Log.d("TAG", String.format("Received Temperature: %d", temperature));
+        Log.d("TAG", String.format("Received Pressure: %d", pressure));
+    }
+
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e("TAG", "Unable to initialize Bluetooth");
+            }
+            // Automatically connects to the device upon successful start-up initialization.
+            mBluetoothLeService.connect(mDeviceAddress);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+
+
+    };
+
+    public class LocalBinder extends Binder {
+        BluetoothLeService getService() {
+            return BluetoothLeService.this;
+        }
+    }
+
 }
+
