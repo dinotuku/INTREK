@@ -45,6 +45,8 @@ public class ProfileFragment extends Fragment {
     private final String TAG = this.getClass().getSimpleName();
 
     public static final String UID = "UID";
+    NumberFormat nf = new DecimalFormat("##.##");
+
 
     private View fragmentView;
 
@@ -192,12 +194,12 @@ public class ProfileFragment extends Fragment {
         mTotalHikes.setText(String.valueOf(userProfile.getTotalHikes()));
 
         TextView mAvgDistance = fragmentView.findViewById(R.id.avg_distance);
-        mAvgDistance.setText(String.valueOf(userProfile.getAvgDistance()));
+        mAvgDistance.setText(nf.format(userProfile.getAvgDistance()));
 
         TextView mAvgPace = fragmentView.findViewById(R.id.avg_pace);
-        mAvgPace.setText(String.valueOf(userProfile.getAvgPace()));
+        mAvgPace.setText(nf.format(userProfile.getAvgPace()));
 
         TextView mAvgElevGain = fragmentView.findViewById(R.id.avg_elev_gain);
-        mAvgElevGain.setText(String.valueOf(userProfile.getAvgElevGain()));
+        mAvgElevGain.setText(nf.format(userProfile.getAvgElevGain()));
     }
 }

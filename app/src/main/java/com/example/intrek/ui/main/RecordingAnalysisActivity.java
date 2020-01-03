@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,8 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
     private String uid ;
     private ListView listView;
     private boolean isFromLiveRecording;
+
+    NumberFormat nf = new DecimalFormat("##.##");
 
     private EditText hikeNameEditText ;
 
@@ -184,9 +187,9 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
 
             // Set their text
             distanceTV.setText(recording.getDistance());
-            avePaceTV.setText("TODO");
+            avePaceTV.setText(nf.format(recording.getAvePace()) + " [min/km]");
             timeTV.setText(recording.getDuration());
-            elevationTV.setText("TODO");
+            elevationTV.setText(nf.format(recording.getElevationGain()) + " [m]");
 
             // Set eventually the name
             hikeNameEditText = row.findViewById(R.id.HikeNameEditText) ;

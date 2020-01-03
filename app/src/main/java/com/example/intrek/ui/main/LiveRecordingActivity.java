@@ -64,6 +64,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
     private TextView distanceTextView;
     private TextView pressureTextView;
     private TextView temperatureTextView;
+    private TextView avePaceTextView;
     private TextView dataPointsTextView;
     private TextView altitudeTextView;
 
@@ -113,9 +114,11 @@ public class LiveRecordingActivity extends AppCompatActivity {
         pressureTextView = findViewById(R.id.pressureTextView);
         dataPointsTextView = findViewById(R.id.dataPointTextView);
         altitudeTextView = findViewById(R.id.altitudeTextView);
-        timerTextView.start();
+        temperatureTextView = findViewById(R.id.temperatureTextView);
+        avePaceTextView = findViewById(R.id.avePaceTextView);
         pauseButton = findViewById(R.id.PauseButton);
         heartRatePlot = findViewById(R.id.HRPlot);
+
 
         // 2. Add location manager to retrieve all the positions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && (checkSelfPermission("android" + "" + ".permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_DENIED || checkSelfPermission("android.permission.ACCESS_COARSE_LOCATION") == PackageManager.PERMISSION_DENIED || checkSelfPermission("android" + "" + ".permission.INTERNET") == PackageManager.PERMISSION_DENIED)) {
@@ -123,6 +126,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
         }
         gpsManager = new GPSManager(this, speedTextView,distanceTextView,altitudeTextView,dataPointsTextView);
         gpsManager.setArraysToCollectData(locationsTimes,locations,averagedLocations,distanceTimes,distances,speedsTimes,speeds,altitudes);
+        gpsManager.setAveragePactextView(avePaceTextView);
 
         // 3. Add the HR manager
         startRecordingOnWatch();
