@@ -8,10 +8,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import java.util.ArrayList;
 
-/**
- * A [FragmentPagerAdapter] that returns a fragment corresponding to
- * one of the sections/tabs/pages.
- */
+// A FragmentPagerAdapter that returns a fragment corresponding to one of the sections/tabs/pages.
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     private final ArrayList<String> titles = new ArrayList<>() ;
@@ -22,7 +19,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         titles.add("Profile");
         titles.add("New recording");
         titles.add("History");
-
     }
 
     @NonNull
