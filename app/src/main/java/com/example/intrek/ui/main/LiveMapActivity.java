@@ -33,6 +33,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+// Show a live map with the current location and some key statistics when user starts an activity.
 public class LiveMapActivity extends AppCompatActivity implements OnMapReadyCallback, OnPositionUpdatedCallback {
 
     private GoogleMap mMap;

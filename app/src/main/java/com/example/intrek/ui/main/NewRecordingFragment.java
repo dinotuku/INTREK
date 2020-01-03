@@ -21,6 +21,7 @@ import com.example.intrek.WearService;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+// The activity before a live recording. It provides user different types of activities.
 public class NewRecordingFragment extends Fragment {
 
     // MARK: - Public variables

@@ -24,4 +24,15 @@
     <string name="temperature">Temperature</string>
     <string name="pressure">Pressure</string>
     <string name="title_activity_maps">Map</string>
+    <string name="profile_picture_description">Profile picture</string>
+    <string name="total_hikes_description">Total Hikes</string>
+    <string name="avg_distance_km_description">Avg. Distance [km]</string>
+    <string name="avg_pace_min_km_description">Avg. Pace [min/km]</string>
+    <string name="avg_elevation_m_description">Avg. Elevation [m]</string>
+    <string name="total_distance_description">Total Distance</string>
+    <string name="total_elevation_description">Total Elevation</string>
+    <string name="farthest_hike_description">Farthest Hike</string>
+    <string name="longest_hike_description">Longest Hike</string>
+    <string name="highest_elevation_description">Highest Elevation</string>
+    <string name="registered_user_message">Welcome back! Enter password to sign in</string>
 </resources>

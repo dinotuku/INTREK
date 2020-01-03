@@ -29,6 +29,8 @@ import com.example.intrek.R;
 
 import java.text.DecimalFormat;
 
+// Show a summary of a completed hike.
+// The summary will contain statistics and plots of sensor values.
 public class RecordingAnalysisActivity extends AppCompatActivity {
 
     private Recording recording ;
