@@ -1,8 +1,8 @@
 Group 2.C: Sports e-hiking
 ===
-[![INTREK](https://img.shields.io/badge/-INTREK-orange)](https://github.com/dinotuku/INTREK)
+[![INTREK](https://img.shields.io/badge/INTREK-Slides-orange?labelColor=ff8800&color=0077ff)](https://docs.google.com/presentation/d/10PvcYlJNrxE2XCZsByf9MExi5w1P5duuJiOohyVXyRc/edit?usp=sharing)
 
-> ### Track your hikes with your phone, smartwatch and sensors
+> ### Track hikes with your phone, smartwatch and sensors
 
 ## Our Setup
 
