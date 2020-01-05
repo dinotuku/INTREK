@@ -115,6 +115,7 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
+            Log.e(TAG, "Change on characterictic");
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
     };
@@ -138,6 +139,8 @@ public class BluetoothLeService extends Service {
             Log.e(TAG, String.format("Received Pressure: %d", pressure));
             intent.putExtra(TEMPERATURE,(double) temperature);
             intent.putExtra(PRESSURE,(double) pressure);
+
+            readCharacteristic(characteristic);
         }else {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
@@ -278,6 +281,11 @@ public class BluetoothLeService extends Service {
             Log.e(TAG, "BluetoothAdapter not initialized");
             return;
         }
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         mBluetoothGatt.readCharacteristic(characteristic);
     }
 
@@ -294,6 +302,7 @@ public class BluetoothLeService extends Service {
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+
 
         /*// This is specific to Heart Rate Measurement.
         if (TEMP_PRESSURE_MEASUREMENT.equals(characteristic.getUuid())) {
