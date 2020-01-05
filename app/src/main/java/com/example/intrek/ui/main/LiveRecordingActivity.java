@@ -79,7 +79,6 @@ public class LiveRecordingActivity extends AppCompatActivity {
     private String mDeviceName;
     private String mDeviceAddress;
 
-
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
 
@@ -152,7 +151,10 @@ public class LiveRecordingActivity extends AppCompatActivity {
         hrManager = new HRManager(this, hrTextView) ;
         hrManager.setToPlot(heartRatePlot,hrDataArrayList,hrTimes);
 
-        // 4. Perform the required initialisation
+        // 4. Add the microcontroller manager
+        microcontrollerManager = new MicrocontrollerManager(this, temperatureTextView, pressureTextView,temperaturesTimesArray,temperaturesArray,pressuresTimesArray,pressuresArray,mDeviceAddress);
+
+        // 5. Start all recordings !
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault());
         startingTime = sdf.format(new Date());
         resume();
