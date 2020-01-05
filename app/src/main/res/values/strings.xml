@@ -15,6 +15,8 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="login_button">Login</string>
+    <string name="facebook_app_id">2541367942643642</string>
+    <string name="fb_login_protocol_scheme">fb2541367942643642</string>
     <string name="pause">Pause</string>
     <string name="timer">Timer</string>
     <string name="heartrate">HeartRate</string>
@@ -42,4 +44,15 @@
     <string name="menu_disconnect">Disconnect</string>
     <string name="menu_scan">Scan</string>
     <string name="menu_stop">Stop</string>
+    <string name="profile_picture_description">Profile picture</string>
+    <string name="total_hikes_description">Total Hikes</string>
+    <string name="avg_distance_km_description">Avg. Distance [km]</string>
+    <string name="avg_pace_min_km_description">Avg. Pace [min/km]</string>
+    <string name="avg_elevation_m_description">Avg. Elevation [m]</string>
+    <string name="total_distance_description">Total Distance</string>
+    <string name="total_elevation_description">Total Elevation</string>
+    <string name="farthest_hike_description">Farthest Hike</string>
+    <string name="longest_hike_description">Longest Hike</string>
+    <string name="highest_elevation_description">Highest Elevation</string>
+    <string name="registered_user_message">Welcome back! Enter password to sign in</string>
 </resources>
