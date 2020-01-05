@@ -1,5 +1,7 @@
 package com.example.intrek.SensorTile;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -28,6 +30,7 @@ public class NumberConversion {
      */
     public static int bytesToInt32(byte[] arr, int start)
     {
+        Log.e("In conversion", ""+ByteBuffer.wrap(arr, start, 4).order(ByteOrder.LITTLE_ENDIAN).getInt());
         return ByteBuffer.wrap(arr, start, 4).order(ByteOrder.LITTLE_ENDIAN).getInt();
     }
 

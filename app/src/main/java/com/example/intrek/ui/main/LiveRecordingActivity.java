@@ -69,6 +69,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
     private GPSManager gpsManager;
     private HRManager hrManager ;
     private MicrocontrollerManager microcontrollerManager ;
+    private BluetoothGattCharacteristic mNotifyCharacteristic;
 
     private BluetoothLeService mBluetoothLeService;
     private String mDeviceName;
@@ -303,9 +304,23 @@ public class LiveRecordingActivity extends AppCompatActivity {
                 // Find heart rate measurement (0x2A37)
                 if (SampleGattAttributes.lookup(uuid, "unknown")
                         .equals("Pressure + Temperature ")) {
-                    Log.e(TAG, "Registering for Pressure and Temperature measurement");
-                    mBluetoothLeService.setCharacteristicNotification(
-                            gattCharacteristic, true);
+                    final int charaProp = gattCharacteristic.getProperties();
+                    if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
+                        // If there is an active notification on a characteristic, clear
+                        // it first so it doesn't update the data field on the user interface.
+                        if (mNotifyCharacteristic != null) {
+                            mBluetoothLeService.setCharacteristicNotification(
+                                    mNotifyCharacteristic, false);
+                            mNotifyCharacteristic = null;
+                        }
+                        mBluetoothLeService.readCharacteristic(gattCharacteristic);
+                    }
+                    if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                        Log.e(TAG, "Registering for Temperature and pressure measurement");
+                        mNotifyCharacteristic = gattCharacteristic;
+                        mBluetoothLeService.setCharacteristicNotification(
+                                gattCharacteristic, true);
+                    }
                 }
             }
         }

@@ -131,10 +131,9 @@ public class BluetoothLeService extends Service {
         Log.e(TAG,"Inside BroadcastUpdate");
 
         if (TEMP_PRESSURE_MEASUREMENT.equals(characteristic.getUuid())) {
-            Log.e(TAG, "Temperature format UINT16.");
-            Log.e(TAG, "Pressure format UINT32.");
-            final int temperature = NumberConversion.bytesToInt16(characteristic.getValue(),6);
-            final int pressure = NumberConversion.bytesToInt32(characteristic.getValue(),2);
+            Log.e(TAG, "Value Characterictic : "+characteristic.getValue());
+            int temperature = NumberConversion.bytesToInt16(characteristic.getValue(),6);
+            int pressure = NumberConversion.bytesToInt32(characteristic.getValue(),2);
             Log.e(TAG, String.format("Received Temperature: %d", temperature));
             Log.e(TAG, String.format("Received Pressure: %d", pressure));
             intent.putExtra(TEMPERATURE, characteristic.getValue());
