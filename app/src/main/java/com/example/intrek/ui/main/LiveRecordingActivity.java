@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
@@ -127,7 +128,8 @@ public class LiveRecordingActivity extends AppCompatActivity {
         }
         gpsManager = new GPSManager(this, speedTextView,distanceTextView,altitudeTextView,dataPointsTextView);
         gpsManager.setArraysToCollectData(locationsTimes,locations,averagedLocations,distanceTimes,distances,speedsTimes,speeds,altitudes);
-        gpsManager.setAveragePactextView(avePaceTextView);
+        gpsManager.setAveragePacextView(avePaceTextView);
+        gpsManager.setSendingNoticeToWatch();
 
         // 3. Add the HR manager
         startRecordingOnWatch();
@@ -198,6 +200,13 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
     // Open the recording manager to view analysis of the hike
     public void finishRecordingButtonTapped(View view) {
+        // Check if we have enough datapoints
+        if (this.averagedLocations.size()==0) {
+            // not enough points
+            Toast.makeText(this, "Not enough datapoints yet. Wait a few seconds.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         pause();
 
         // 1. Create the recording

@@ -119,7 +119,7 @@ public class LiveMapActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     private void drawPath(ArrayList<LatLng> locations) {
-        polyline = mMap.addPolyline(new PolylineOptions().addAll(locations).width(12).color(Color.BLUE).endCap(new RoundCap()));
+        polyline = mMap.addPolyline(new PolylineOptions().addAll(locations).width(12).color(Color.BLUE));
         //circle = mMap.addCircle(new CircleOptions().center(locations.get(locations.size()-1)).radius(1).fillColor(Color.BLUE).strokeWidth(10f).strokeColor(Color.WHITE));
     }
 

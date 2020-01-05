@@ -79,8 +79,7 @@ public class ProfileFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.fragment_profile, container, false);
 
@@ -188,7 +187,7 @@ public class ProfileFragment extends Fragment {
                             Double inKm = inMeter / 1000 ;
                             ArrayList<RecordingData> statistics = recording.getStatistics();
                             String pace_string = statistics.get(0).getAverage();
-                            double elevation = statistics.get(3).getMaxY() - statistics.get(3).getMinY();
+                            double elevation = recording.getElevationGain();
 
                             totalHikes[0] += 1;
                             distances_list.add(inKm);
@@ -209,6 +208,7 @@ public class ProfileFragment extends Fragment {
                                 farthestHikeDate[0] = dates_list.get(i);
                             }
                         }
+
                         Double avgDistance = totalDistance / distances_list.size();
 
                         // Calculate average pace

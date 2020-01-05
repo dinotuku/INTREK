@@ -29,6 +29,12 @@ allprojects {
 
                 path_send_HR:"/SEND_HR",
                 heart_rate:"HEART_RATE",
+
+                path_send_pace:"/SEND_PACE",
+                pace:"PACE",
+
+                path_send_DISTANCE:"/SEND_DISTANCE",
+                distance:"DISTANCE"
         ]
     }
 }

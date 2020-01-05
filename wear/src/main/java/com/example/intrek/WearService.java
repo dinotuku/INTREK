@@ -34,10 +34,9 @@ import java.util.List;
 
 public class WearService extends WearableListenerService {
 
-    // Tag for Logcat
     private static final String TAG = "WearService";
-
-    // Class constants for public usages
+    public static final String PACE = "PACE";
+    public static final String DISTANCE = "DISTANCE";
     public static final String HEART_RATE = "HEART_RATE";
 
     // Actions defined for the onStartCommand(...)
@@ -79,21 +78,16 @@ public class WearService extends WearableListenerService {
         switch (path) {
             case BuildConfig.W_path_start_activity:
                 Intent startIntent = null ;
-
                 // Find which activity has been asked for
-
                 switch (data) {
                     case BuildConfig.W_start_activity:
                         startIntent = new Intent(this,MainActivity.class);
                         break ;
                 }
-
-
                 if (startIntent == null) {
                     Log.w(TAG, "Asked to start unhandled activity: " + data);
                     return;
                 }
-
                 startActivity(startIntent);
                 break;
             default:
@@ -111,7 +105,6 @@ public class WearService extends WearableListenerService {
 
             // Test if data has changed or has been removed
             if (event.getType() == DataEvent.TYPE_CHANGED) {
-
                 // Extract the dataMap from the event
                 DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
 
@@ -121,6 +114,19 @@ public class WearService extends WearableListenerService {
 
                 assert uri.getPath() != null;
                 switch (uri.getPath()) {
+                    case BuildConfig.W_path_send_pace:
+                        Double data = dataMapItem.getDataMap().getDouble(BuildConfig.W_pace);
+                        intent = new Intent(MainActivity.ACTION_RECEIVE_PACE);
+                        Log.i("HELLO",String.valueOf(data));
+                        intent.putExtra(PACE,data);
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                        break;
+                    case BuildConfig.W_path_send_DISTANCE:
+                        Double dist = dataMapItem.getDataMap().getDouble(BuildConfig.W_distance);
+                        intent = new Intent(MainActivity.ACTION_RECEIVE_DIST);
+                        intent.putExtra(DISTANCE,dist);
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                        break;
                     default:
                         Log.v(TAG, "Data changed for unhandled path: " + uri);
                         break;

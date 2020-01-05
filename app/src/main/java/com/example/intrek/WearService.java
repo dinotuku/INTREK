@@ -42,10 +42,12 @@ public class WearService extends WearableListenerService {
 
     // Keys for the intent
     public static final String START_ACTIVITY_KEY = "START_ACTIVITY";
+    public static final String PACE = "PACE";
+    public static final String DISTANCE = "DISTANCE";
 
     // Actions defined for the onStartCommand(...)
     public enum ACTION_SEND {
-        START_ACTIVITY
+        START_ACTIVITY, PACE, DISTANCE
     }
 
     @Override
@@ -57,12 +59,25 @@ public class WearService extends WearableListenerService {
 
         // Match against the given action
         ACTION_SEND action = ACTION_SEND.valueOf(intent.getAction());
+        PutDataMapRequest putDataMapRequest;
         switch (action) {
             case START_ACTIVITY:
                 Log.i(TAG,"Sending a message to start an activity on the watch");
                 String activity = intent.getStringExtra(START_ACTIVITY_KEY);
                 sendMessage(activity,BuildConfig.W_path_start_activity);
                 break ;
+            case PACE:
+                putDataMapRequest = PutDataMapRequest.create(BuildConfig.W_path_send_pace);
+                Double pace = intent.getDoubleExtra(PACE,-1);
+                putDataMapRequest.getDataMap().putDouble(BuildConfig.W_pace, pace);
+                sendPutDataMapRequest(putDataMapRequest);
+                break;
+            case DISTANCE:
+                putDataMapRequest = PutDataMapRequest.create(BuildConfig.W_path_send_DISTANCE);
+                Double dist = intent.getDoubleExtra(DISTANCE,-1);
+                putDataMapRequest.getDataMap().putDouble(BuildConfig.W_distance, dist);
+                sendPutDataMapRequest(putDataMapRequest);
+                break;
             default:
                 Log.w(TAG, "Unknown action is required...");
                 break;

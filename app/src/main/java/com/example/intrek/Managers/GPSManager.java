@@ -1,11 +1,14 @@
 package com.example.intrek.Managers;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Looper;
 import android.widget.TextView;
 
+import com.example.intrek.BuildConfig;
 import com.example.intrek.Interfaces.OnPositionUpdatedCallback;
+import com.example.intrek.WearService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -33,8 +36,8 @@ public class GPSManager {
     private boolean hasMapCallback ;
     private boolean hasDistanceOffset ;
     private boolean hasAvePace;
+    private boolean isSendingNoticeToWatch ;
     private Double distanceOffsetInMeter  ;
-
 
     // All arrays that are used and need to be updated
     /*
@@ -49,7 +52,6 @@ public class GPSManager {
 
     // This array is only used here and
     private ArrayList<Double> averagedAltitudes = new ArrayList<>();
-
 
     // Arrays to be saved later
     private ArrayList<Long> locationsTimes ;
@@ -68,7 +70,6 @@ public class GPSManager {
     private TextView dataPointsTextView;
     private TextView avePaceTextView;
 
-
     // Set the GPS manager to the given activity.
     // If the function 'setArraysToCollectData' is not called, then it will not collect the data.
     public GPSManager(Activity activity, TextView speedTextView, TextView distanceTextView, TextView altitudeTextView, TextView dataPointsTextView) {
@@ -77,6 +78,7 @@ public class GPSManager {
         this.hasMapCallback = false;
         this.hasDistanceOffset = false ;
         this.hasAvePace = false  ;
+        this.isSendingNoticeToWatch = false ;
         this.distanceOffsetInMeter = 0.0 ;
         this.speedTextView = speedTextView ;
         this.distanceTextView = distanceTextView ;
@@ -119,9 +121,14 @@ public class GPSManager {
         displayDistance(0.0);
     }
 
-    public void setAveragePactextView(TextView avePaceTextView) {
+    public void setAveragePacextView(TextView avePaceTextView) {
         this.avePaceTextView = avePaceTextView ;
         this.hasAvePace = true ;
+    }
+
+    // If this method is called, then the gps will send the data to the watch as well.
+    public void setSendingNoticeToWatch() {
+        this.isSendingNoticeToWatch = true ;
     }
 
     public void startRecording() {
@@ -189,9 +196,25 @@ public class GPSManager {
 
         }
 
-
-
     }
+
+    private void sendPaceToWatch(Double data) {
+        // Send an intent to open watch
+        Intent intentStartRec = new Intent(this.activity, WearService.class);
+        intentStartRec.setAction(WearService.ACTION_SEND.PACE.name());
+        intentStartRec.putExtra(WearService.PACE, data);
+        activity.startService(intentStartRec);
+    }
+
+    private void sendDistanceToWatch(Double data) {
+        // Send an intent to open watch
+        Intent intentStartRec = new Intent(this.activity, WearService.class);
+        intentStartRec.setAction(WearService.ACTION_SEND.DISTANCE.name());
+        intentStartRec.putExtra(WearService.DISTANCE, data);
+        activity.startService(intentStartRec);
+    }
+
+    //// GETTERS for the class
 
     public Double getDistance() {
         return averagedLocations.size() > 0 ? SphericalUtil.computeLength(averagedLocations) : 0.0 ;
@@ -214,6 +237,9 @@ public class GPSManager {
     private void displayDistance(Double dist) {
         Double inKm = (dist + (hasDistanceOffset ? distanceOffsetInMeter : 0.0)) / 1000 ;
         String s = nf.format(inKm) + " [km]";
+        if (isSendingNoticeToWatch) {
+            sendDistanceToWatch(inKm);
+        }
         distanceTextView.setText(s);
     }
 
@@ -223,6 +249,9 @@ public class GPSManager {
             Double pace = 60 / inKmH ;
             if (pace > 20) {
                 pace = 0.0 ;
+            }
+            if (isSendingNoticeToWatch) {
+                sendPaceToWatch(pace);
             }
             String s = nf.format(pace) + " [min/km]" ;
             speedTextView.setText(s);

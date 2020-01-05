@@ -263,6 +263,9 @@ public class Recording implements Serializable {
     // Returns an array with the HR values as doubles
     private ArrayList<Double> getHRAsDouble() {
         ArrayList<Double> toReturn = new ArrayList<>();
+        if (hrDataArrayList == null) {
+            return toReturn;
+        }
         for (Integer i: hrDataArrayList) {
             toReturn.add((double) i) ;
         }

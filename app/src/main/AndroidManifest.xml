@@ -39,6 +39,7 @@
 
         <activity
             android:name=".ui.main.LiveRecordingActivity">
+
         </activity>
         <activity
             android:name=".ui.main.LoginActivity"
@@ -48,6 +49,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
 

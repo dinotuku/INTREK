@@ -3,8 +3,10 @@ package com.example.intrek.ui.main;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -22,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
@@ -32,6 +35,7 @@ import com.androidplot.xy.XYSeries;
 import com.example.intrek.DataModel.Recording;
 import com.example.intrek.DataModel.RecordingData;
 import com.example.intrek.DataModel.XYPlotSeriesList;
+import com.example.intrek.MainActivity;
 import com.example.intrek.R;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -61,6 +65,8 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recording_analysis);
+        Button cancelButton = findViewById(R.id.cancelButton);
+        cancelButton.bringToFront();
 
         // 1. Obtain the recording
         recording = (Recording) getIntent().getSerializableExtra("Recording");
@@ -76,11 +82,10 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
             Button saveButton = findViewById(R.id.SaveButton);
             saveButton.setVisibility(View.INVISIBLE);
             saveButton.setEnabled(false);
+            cancelButton.setVisibility(View.INVISIBLE);
+            cancelButton.setEnabled(false);
         }
-
-
     }
-
 
 
     @Override
@@ -94,12 +99,33 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
         String text = hikeNameEditText.getText().toString();
         if (TextUtils.isEmpty(text)) {
             hikeNameEditText.setError("Name required.");
+            Toast.makeText(this, "Name required.", Toast.LENGTH_LONG).show();
         } else {
             // set name
             recording.setName(text);
             // save to Firebase
             recording.saveToFirebase(uid);
+            // Come back to first page
+            Intent i = new Intent(RecordingAnalysisActivity.this, MainActivity.class);        // Specify any activity here e.g. home or splash or login etc
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.putExtra("EXIT", true);
+            i.putExtra(ProfileFragment.UID,uid);
+            startActivity(i);
+            finish();
         }
+    }
+
+    public void cancelButtonTapped(View view) {
+        Intent i = new Intent(RecordingAnalysisActivity.this, MainActivity.class);        // Specify any activity here e.g. home or splash or login etc
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        i.putExtra("EXIT", true);
+        i.putExtra(ProfileFragment.UID,uid);
+        startActivity(i);
+        finish();
     }
 
     // This method is here to set the list view.
