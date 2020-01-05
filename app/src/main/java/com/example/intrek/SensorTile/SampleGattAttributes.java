@@ -33,6 +33,7 @@ public class SampleGattAttributes {
     public static final String COMMON_DEBUG_UUID_CHAR = "-000e" + COMMON_CHAR_UUID;
     public static final String COMMON_CONFIG_UUID_CHAR = "-000f" + COMMON_CHAR_UUID;
     public static final String BASE_FEATURE_COMMON_UUID = "-0001" + COMMON_CHAR_UUID;
+    public static final String TEMP_PRESSURE = "00140000"+ BASE_FEATURE_COMMON_UUID;
 
     static {
         // Sample Services.

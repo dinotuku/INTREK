@@ -37,6 +37,7 @@ public class NewRecordingFragment extends Fragment {
     public static final String SELECTED_INDEX = "SelectedIndex";
     public static final String DEVICE_NOT_SUPPORTED = "Device not supported";
     private String mDeviceAddress = "-1";
+    private String mDeviceName = null;
     private BluetoothLeService mBluetoothLeService;
     private boolean mConnected = false;
 
@@ -111,10 +112,10 @@ public class NewRecordingFragment extends Fragment {
             updateTypeButtonText();
         }
         if (requestCode == TYPE_REQUEST_TILE && resultCode == AppCompatActivity.RESULT_OK) {
-            String deviceName = data.getStringExtra(DeviceScanActivity.DEVICE_NAME);
-            if (deviceName!=null){
+            mDeviceName = data.getStringExtra(DeviceScanActivity.DEVICE_NAME);
+            if (mDeviceName!=null){
                 mDeviceAddress = data.getStringExtra(DeviceScanActivity.DEVICE_ADDRESS);
-                tileButton.setText(deviceName);
+                tileButton.setText(mDeviceName);
                 tileButton.setBackgroundColor(0XFF00A000);
 
             }else{
@@ -136,9 +137,9 @@ public class NewRecordingFragment extends Fragment {
         String uid = getActivity().getIntent().getExtras().getString(ProfileFragment.UID);
         Intent intent = new Intent(getActivity(), LiveRecordingActivity.class);
         intent.putExtra(ProfileFragment.UID,uid) ;
-        intent.putExtra(DEVICE_ADDRESS,mDeviceAddress);
+        intent.putExtra(LiveRecordingActivity.EXTRAS_DEVICE_ADDRESS,mDeviceAddress);
+        intent.putExtra(LiveRecordingActivity.EXTRAS_DEVICE_NAME, mDeviceName);
         startActivity(intent);
-
     }
 
 
