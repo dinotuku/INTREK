@@ -75,6 +75,9 @@
         <activity
             android:name=".ui.main.TypePickerPopUp"
             android:theme="@style/AppTheme.CustomTheme" />
+        <activity
+            android:name=".ui.main.DevicePickerPopUp"
+            android:theme="@style/AppTheme.CustomTheme" />
 
         <service android:name=".WearService">
             <intent-filter>

@@ -93,8 +93,9 @@ public class NewRecordingFragment extends Fragment {
         tileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), DeviceScanActivity.class);
-                startActivityForResult(intent,TYPE_REQUEST_TILE);
+                presentDevicesDialog() ;
+                //Intent intent = new Intent(getActivity(), DeviceScanActivity.class);
+                //startActivityForResult(intent,TYPE_REQUEST_TILE);
             }
         });
 
@@ -121,7 +122,6 @@ public class NewRecordingFragment extends Fragment {
                     tileButton.setText(deviceName);
                     tileButton.setText(mDeviceName);
                     tileButton.setBackgroundColor(0XFF00A000);
-
                 } else {
                     Toast.makeText(getActivity(), DEVICE_NOT_SUPPORTED, Toast.LENGTH_SHORT).show();
                     tileButton.setText("Connexion");
@@ -155,6 +155,11 @@ public class NewRecordingFragment extends Fragment {
         Intent intent = new Intent(getActivity(), TypePickerPopUp.class);
         intent.putExtra(SELECTED_INDEX,selectedType);
         startActivityForResult(intent,TYPE_REQUEST);
+    }
+
+    private void presentDevicesDialog() {
+        Intent intent = new Intent(getActivity(), DevicePickerPopUp.class);
+        startActivityForResult(intent,TYPE_REQUEST_TILE);
     }
 
     // This function will update the text displayed on the type button
