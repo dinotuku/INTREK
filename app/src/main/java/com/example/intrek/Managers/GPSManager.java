@@ -31,6 +31,9 @@ public class GPSManager {
     private LocationCallback locationCallback;
     private boolean isCollectingData;
     private boolean hasMapCallback ;
+    private boolean hasDistanceOffset ;
+    private boolean hasAvePace;
+    private Double distanceOffsetInMeter  ;
 
 
     // All arrays that are used and need to be updated
@@ -40,7 +43,15 @@ public class GPSManager {
     The arrays locations and average locations are important to compute the distance as well !
      */
     private long initialTime = System.currentTimeMillis() ;
+    NumberFormat nf = new DecimalFormat("##.##");
     private int i = 0 ;
+    private double currentGain = 0.0  ;
+
+    // This array is only used here and
+    private ArrayList<Double> averagedAltitudes = new ArrayList<>();
+
+
+    // Arrays to be saved later
     private ArrayList<Long> locationsTimes ;
     private ArrayList<LatLng> locations = new ArrayList<>() ;
     private ArrayList<LatLng> averagedLocations = new ArrayList<>() ;
@@ -55,6 +66,8 @@ public class GPSManager {
     private TextView distanceTextView;
     private TextView altitudeTextView;
     private TextView dataPointsTextView;
+    private TextView avePaceTextView;
+
 
     // Set the GPS manager to the given activity.
     // If the function 'setArraysToCollectData' is not called, then it will not collect the data.
@@ -62,6 +75,9 @@ public class GPSManager {
         this.activity = activity;
         this.isCollectingData = false;
         this.hasMapCallback = false;
+        this.hasDistanceOffset = false ;
+        this.hasAvePace = false  ;
+        this.distanceOffsetInMeter = 0.0 ;
         this.speedTextView = speedTextView ;
         this.distanceTextView = distanceTextView ;
         this.altitudeTextView = altitudeTextView ;
@@ -80,6 +96,7 @@ public class GPSManager {
 
     public void setArraysToCollectData(ArrayList<Long> locationsTimes, ArrayList<LatLng> locations, ArrayList<LatLng> averagedLocations, ArrayList<Long> distanceTimes, ArrayList<Double> distances, ArrayList<Long> speedsTimes, ArrayList<Double> speeds, ArrayList<Double> altitudes) {
         this.isCollectingData = true ;
+
         this.locationsTimes = locationsTimes;
         this.locations = locations;
         this.averagedLocations = averagedLocations;
@@ -95,6 +112,18 @@ public class GPSManager {
         this.callback = callback;
     }
 
+    // Set the distance offset. If this function is called, every distance outèut will be moved by a special offset in meters.
+    public void setDistanceOffset(Double offset) {
+        this.hasDistanceOffset = true ;
+        this.distanceOffsetInMeter = offset ;
+        displayDistance(0.0);
+    }
+
+    public void setAveragePactextView(TextView avePaceTextView) {
+        this.avePaceTextView = avePaceTextView ;
+        this.hasAvePace = true ;
+    }
+
     public void startRecording() {
         LocationRequest locationRequest = new LocationRequest().setInterval(5).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
@@ -106,58 +135,85 @@ public class GPSManager {
 
     // This method is called everytime a new location has been obtained.
     private void onLocationChanged(Location location) {
-        int N_pos = 5 ; i ++ ;
+        int N_pos = 5 ;
 
         // 1. Add the data to be process / save (optional)
-        if (isCollectingData) {
-            locationsTimes.add(System.currentTimeMillis()-initialTime);
-        }
         LatLng newPoint = new LatLng(location.getLatitude(),location.getLongitude());
-        locations.add(newPoint);
-        int numberOfPoints = locations.size();
-        if (hasMapCallback) {
-            this.callback.newPointAvailable(newPoint);
-        }
-
-
-        if (numberOfPoints>N_pos) {
-            // 2. Average the location over N_pos last values and compute the distance
-            double lats = 0.0 ; double longs = 0.0 ;
-            for (int j=0; j < N_pos; j++) {
-                LatLng l = locations.get(numberOfPoints-1-j);
-                lats += l.latitude ;
-                longs += l.longitude ;
-            }
-            LatLng averagedValue = new LatLng(lats/N_pos, longs/N_pos);
-            averagedLocations.add(averagedValue);
-            double dist = SphericalUtil.computeLength(averagedLocations);
-            displayDistance(dist);
-
-            if (isCollectingData) {
-                distanceTimes.add(System.currentTimeMillis()-initialTime);
-                distances.add(dist);
-            }
-        }
-
-        // 3. Get the speed and the altitude
         double speed = location.getSpeed() * 3.6;
         double altitude = location.getAltitude();
-        displaySpeed(speed);
-        displayAltitude(altitude);
-        displayDataPoints();
+
+        locations.add(newPoint);
         if (isCollectingData) {
+            locationsTimes.add(System.currentTimeMillis()-initialTime);
             speeds.add(speed);
             altitudes.add(altitude);
             speedsTimes.add(System.currentTimeMillis()-initialTime);
         }
 
-        // 4. Callback for position
+        if (hasMapCallback) {
+            this.callback.newPointAvailable(newPoint);
+        }
+
+        displaySpeed(speed);
+        displayAltitude(altitude);
+        displayDataPoints();
+        if (hasAvePace) {
+            displayAvePace();
+        }
+
+
+        // 2. Average the location over N_pos last values and compute the distance
+
+        if (locations.size()>N_pos) {
+            double lats = 0.0 ; double longs = 0.0 ; double alts = 0.0 ;
+            for (int j=0; j < N_pos; j++) {
+                LatLng l = locations.get(locations.size()-1-j);
+                lats += l.latitude ;
+                longs += l.longitude ;
+                if (isCollectingData) {
+                    alts += altitudes.get(altitudes.size()-1-j) ;
+                }
+            }
+            averagedLocations.add(new LatLng(lats/N_pos, longs/N_pos));
+            if (isCollectingData) {
+                averagedAltitudes.add(alts/N_pos) ;
+                updateElevationGain();
+            }
+
+            double dist = SphericalUtil.computeLength(averagedLocations);
+            displayDistance(dist);
+            if (isCollectingData) {
+                distanceTimes.add(System.currentTimeMillis()-initialTime);
+                distances.add(dist);
+            }
+
+        }
+
+
+
+    }
+
+    public Double getDistance() {
+        return averagedLocations.size() > 0 ? SphericalUtil.computeLength(averagedLocations) : 0.0 ;
+    }
+
+    public Double getElevationGain() {
+        return currentGain;
+    }
+
+    // Updates the value of the elevation gain using the last 2 values of the average altitudes array
+    private void updateElevationGain() {
+        if (averagedAltitudes.size()>1) {
+            int i = averagedAltitudes.size()-1;
+            double deltaZ = averagedAltitudes.get(i) - averagedAltitudes.get(i-1) ;
+            if (deltaZ>0)
+                currentGain += deltaZ ;
+        }
     }
 
     private void displayDistance(Double dist) {
-        Double inKm = dist / 1000 ;
-        NumberFormat nf = new DecimalFormat("##.##");
-        String s = nf.format(inKm) + " km";
+        Double inKm = (dist + (hasDistanceOffset ? distanceOffsetInMeter : 0.0)) / 1000 ;
+        String s = nf.format(inKm) + " [km]";
         distanceTextView.setText(s);
     }
 
@@ -168,15 +224,29 @@ public class GPSManager {
             if (pace > 20) {
                 pace = 0.0 ;
             }
-            NumberFormat nf = new DecimalFormat("##.##");
-            String s = nf.format(speed) + " [km/h] - " + nf.format(pace) + " [min/km]" ;
+            String s = nf.format(pace) + " [min/km]" ;
             speedTextView.setText(s);
         }
     }
 
+    private void displayAvePace() {
+        // 1. Compute the average speed
+        Double aveSpeed = 0.0 ;
+        for (Double s: speeds) {
+            aveSpeed += s ;
+        }
+        aveSpeed = aveSpeed / speeds.size() ;
+        // 2. display the average speed
+        Double avePace = 60 / aveSpeed ;
+        if (avePace > 20) {
+            avePace = 0.0 ;
+        }
+        String s = nf.format(avePace) + " [min/km]" ;
+        avePaceTextView.setText(s);
+    }
+
     private void displayAltitude(Double alt) {
-        NumberFormat nf = new DecimalFormat("##.##");
-        String s = nf.format(alt) + " m";
+        String s = nf.format(currentGain) + " [m]";
         altitudeTextView.setText(s);
     }
 

@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.intrek.MainActivity;
 import com.example.intrek.R;
 
+// Handle the picker in NewRecordingActivity.
 public class TypePickerPopUp extends Activity {
 
     public static final String NEW_INDEX = "newIndex";

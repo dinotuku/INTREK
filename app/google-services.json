@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1014487849405",
+    "firebase_url": "https://intrek-6a9e4.firebaseio.com",
+    "project_id": "intrek-6a9e4",
+    "storage_bucket": "intrek-6a9e4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1014487849405:android:eef3ad911588f0926c5ad4",
+        "android_client_info": {
+          "package_name": "com.example.intrek"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1014487849405-ge65ao0kh8hd8emq5tm3t70mgar1oudf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.intrek",
+            "certificate_hash": "58a318fbe35176024490928eff08eb18d6de75fd"
+          }
+        },
+        {
+          "client_id": "1014487849405-q7hea7ojcreqtvd2ph7rpjtuh1vl1ja4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjDSiAyIqt1YApD1rCTgUTAFeO6Udcixs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1014487849405-q7hea7ojcreqtvd2ph7rpjtuh1vl1ja4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
