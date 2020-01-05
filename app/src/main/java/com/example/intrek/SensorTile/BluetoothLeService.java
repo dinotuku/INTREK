@@ -136,8 +136,8 @@ public class BluetoothLeService extends Service {
             int pressure = NumberConversion.bytesToInt32(characteristic.getValue(),2);
             Log.e(TAG, String.format("Received Temperature: %d", temperature));
             Log.e(TAG, String.format("Received Pressure: %d", pressure));
-            intent.putExtra(TEMPERATURE, characteristic.getValue());
-            intent.putExtra(PRESSURE, characteristic.getValue());
+            intent.putExtra(TEMPERATURE,(double) temperature);
+            intent.putExtra(PRESSURE,(double) pressure);
         }else {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();
@@ -315,4 +315,5 @@ public class BluetoothLeService extends Service {
 
         return mBluetoothGatt.getServices();
     }
+
 }
