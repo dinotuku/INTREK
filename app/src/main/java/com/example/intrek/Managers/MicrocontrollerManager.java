@@ -52,6 +52,8 @@ public class MicrocontrollerManager {
     private double mTemperature;
     private double mPressure;
 
+    private BluetoothGattCharacteristic mNotifyCharacteristic;
+
     private long initialTime = System.currentTimeMillis() ;
 
     // Fields created inside the class
@@ -109,12 +111,8 @@ public class MicrocontrollerManager {
                 // Show all the supported services and characteristics on the user interface.
                 registerTileService(mBluetoothLeService.getSupportedGattServices());
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                mTemperature = intent.getDoubleExtra(BluetoothLeService.TEMPERATURE, -1) /10.0;
+                mTemperature = intent.getDoubleExtra(BluetoothLeService.TEMPERATURE, -1)/10.0;
                 mPressure = intent.getDoubleExtra(BluetoothLeService.PRESSURE, -1)/100.0;
-                String s = String.valueOf(mTemperature) + " [C°]" ;
-                temperatureTextView.setText(s);
-                s = String.valueOf(mPressure) + " [mPa]" ;
-                temperatureTextView.setText(s);
                 Log.e("In Manager","Temp: "+ mTemperature);
                 Log.e("In Manager","Press: "+ mPressure);
 
@@ -154,17 +152,34 @@ public class MicrocontrollerManager {
             for (BluetoothGattCharacteristic
                     gattCharacteristic : gattCharacteristics) {
                 uuid = gattCharacteristic.getUuid().toString();
+                Log.e(TAG, "Value : " + gattCharacteristic.getValue());
                 // Find heart rate measurement (0x2A37)
                 if (SampleGattAttributes.lookup(uuid, "unknown")
                         .equals("Pressure + Temperature ")) {
-                    Log.i("TAG", "Registering for Pressure and Temperature measurement");
+                    final int charaProp = gattCharacteristic.getProperties();
+                    if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
+                        // If there is an active notification on a characteristic, clear
+                        // it first so it doesn't update the data field on the user interface.
+                        if (mNotifyCharacteristic != null) {
+                            mBluetoothLeService.setCharacteristicNotification(
+                                    mNotifyCharacteristic, false);
+                            mNotifyCharacteristic = null;
+                        }
+                        mBluetoothLeService.readCharacteristic(gattCharacteristic);
+                    }
+                    if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                        Log.i(TAG, "Registering for Temperature and pressure measurement");
+                        mNotifyCharacteristic = gattCharacteristic;
+                        mBluetoothLeService.setCharacteristicNotification(
+                                gattCharacteristic, true);
+                    }
+                    Log.e(TAG, "Registering for Pressure and Temperature measurement");
                     mBluetoothLeService.setCharacteristicNotification(
                             gattCharacteristic, true);
                 }
             }
         }
     }
-
 }
 
 

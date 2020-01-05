@@ -316,11 +316,14 @@ public class LiveRecordingActivity extends AppCompatActivity {
                         mBluetoothLeService.readCharacteristic(gattCharacteristic);
                     }
                     if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
-                        Log.e(TAG, "Registering for Temperature and pressure measurement");
+                        Log.i(TAG, "Registering for Temperature and pressure measurement");
                         mNotifyCharacteristic = gattCharacteristic;
                         mBluetoothLeService.setCharacteristicNotification(
                                 gattCharacteristic, true);
                     }
+                    Log.e(TAG, "Registering for Pressure and Temperature measurement");
+                    mBluetoothLeService.setCharacteristicNotification(
+                            gattCharacteristic, true);
                 }
             }
         }
@@ -351,7 +354,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
                 String s = String.valueOf(mTemperature) + " [C°]" ;
                 temperatureTextView.setText(s);
                 s = String.valueOf(mPressure) + " [mPa]" ;
-                temperatureTextView.setText(s);
+                pressureTextView.setText(s);
                 Log.e("In Manager","Temp: "+ mTemperature);
                 Log.e("In Manager","Press: "+ mPressure);
             }
