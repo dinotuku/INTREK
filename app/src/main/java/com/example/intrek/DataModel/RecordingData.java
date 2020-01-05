@@ -13,6 +13,7 @@ public class RecordingData {
     private String unit;
     private ArrayList<Double> times = new ArrayList<>();
     private ArrayList<Double> values = new ArrayList<>();
+    private ArrayList<Float> valuesfloat = new ArrayList<>();
 
     public RecordingData(String name, ArrayList<Double> times, ArrayList<Double> values, String unit) {
         this.name = name ;
@@ -20,6 +21,8 @@ public class RecordingData {
         this.values = values;
         this.unit = unit ;
     }
+
+
 
     public String getName() {
         return name;

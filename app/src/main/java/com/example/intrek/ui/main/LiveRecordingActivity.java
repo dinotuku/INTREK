@@ -3,10 +3,14 @@ package com.example.intrek.ui.main;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -15,7 +19,6 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
@@ -35,29 +38,26 @@ import com.example.intrek.Managers.GPSManager;
 import com.example.intrek.Managers.HRManager;
 import com.example.intrek.Managers.MicrocontrollerManager;
 import com.example.intrek.R;
+import com.example.intrek.SensorTile.BluetoothLeService;
+import com.example.intrek.SensorTile.SampleGattAttributes;
 import com.example.intrek.WearService;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.SphericalUtil;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
-
-import static com.example.intrek.R.id.HRPlot;
 
 // Show statistics and heart rate plot when user starts an activity.
 public class LiveRecordingActivity extends AppCompatActivity {
 
     public static final String ACTION_RECEIVE_HEART_RATE = "ACTION_RECEIVE_HEART_RATE";
     public static final String HEART_RATE = "HeartRate";
+    private static final String TAG = "In LiveRecording";
+
+    public static final String ACTION_RECEIVE_TILE = "ACTION_RECEIVE_TILE ";
 
     private Chronometer timerTextView;
     private Button pauseButton;
@@ -72,14 +72,23 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
     private long timerValueWhenPaused = 0;
     private boolean isPaused = false;
-    // https://stackoverflow.com/questions/5369682/how-to-get-current-time-and-date-in-android
-    private String startingTime ;
     private GPSManager gpsManager;
     private HRManager hrManager ;
-    private MicrocontrollerManager microcontrollerManager ;
+    private MicrocontrollerManager microcontrollerManager;
+
+    private String mDeviceName;
+    private String mDeviceAddress;
+
+
+    public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
+    public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
+
 
     // For the location
     private int i = 0 ;
+    private long initialTime = System.currentTimeMillis() ;
+    private String startingTime ;
+
 
     // Arrays for the location and for the distance (same time vector)
     private ArrayList<Long> locationsTimes = new ArrayList<>();
@@ -105,8 +114,13 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_recording);
+
+        final Intent intent = getIntent();
+        mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
+        mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
 
         // 1. Get the elements of the UI
         timerTextView = findViewById(R.id.timerTextView);
@@ -125,6 +139,8 @@ public class LiveRecordingActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && (checkSelfPermission("android" + "" + ".permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_DENIED || checkSelfPermission("android.permission.ACCESS_COARSE_LOCATION") == PackageManager.PERMISSION_DENIED || checkSelfPermission("android" + "" + ".permission.INTERNET") == PackageManager.PERMISSION_DENIED)) {
             requestPermissions(new String[]{"android.permission.ACCESS_FINE_LOCATION", "android" + ".permission.ACCESS_COARSE_LOCATION", "android.permission.INTERNET"}, 0);
         }
+
+        //initialTime = System.currentTimeMillis();
         gpsManager = new GPSManager(this, speedTextView,distanceTextView,altitudeTextView,dataPointsTextView);
         gpsManager.setArraysToCollectData(locationsTimes,locations,averagedLocations,distanceTimes,distances,speedsTimes,speeds,altitudes);
         gpsManager.setAveragePacextView(avePaceTextView);
@@ -136,10 +152,7 @@ public class LiveRecordingActivity extends AppCompatActivity {
         hrManager = new HRManager(this, hrTextView) ;
         hrManager.setToPlot(heartRatePlot,hrDataArrayList,hrTimes);
 
-        // 4. Add the microcontroller manager
-        microcontrollerManager = new MicrocontrollerManager(this, temperatureTextView, pressureTextView,temperaturesTimesArray,temperaturesArray,pressuresTimesArray,pressuresArray);
-
-        // 5. Start all recordings !
+        // 4. Perform the required initialisation
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.getDefault());
         startingTime = sdf.format(new Date());
         resume();
@@ -154,6 +167,15 @@ public class LiveRecordingActivity extends AppCompatActivity {
     }
 
     //region Pause functions
+
+    public void pauseButtonTapped(View view) {
+        if (isPaused) {
+            resume();
+        } else {
+            pause();
+        }
+    }
+
     private void resume() {
         // START AGAIN
         timerTextView.setBase(SystemClock.elapsedRealtime() + timerValueWhenPaused);
@@ -161,7 +183,10 @@ public class LiveRecordingActivity extends AppCompatActivity {
         pauseButton.setText("Pause");
         gpsManager.startRecording();
         hrManager.startRecording();
-        microcontrollerManager.startRecording();
+        //Try to start the SensorTile only if there is a name
+        if (mDeviceName!=null){
+            microcontrollerManager.startRecording();
+        }
         isPaused = false ;
     }
 
@@ -172,28 +197,20 @@ public class LiveRecordingActivity extends AppCompatActivity {
         pauseButton.setText("Resume");
         gpsManager.stopRecording();
         hrManager.stopRecording();
-        microcontrollerManager.startRecording();
+        if (mDeviceName!=null) {
+            microcontrollerManager.stopRecording();
+        }
         isPaused = true ;
     }
     //endregion
 
     //region Function for handling the buttons actions
-    public void pauseButtonTapped(View view) {
-        if (isPaused) {
-            resume();
-        } else {
-            pause();
-        }
-    }
-
     public void mapButtonTapped(View view) {
         // Open a new activity which will show the map
         Intent startMapIntent = new Intent(LiveRecordingActivity.this, LiveMapActivity.class);
-        // Put all the extras for the mapActivity to work
         startMapIntent.putExtra("Locations",this.locations);
         timerValueWhenPaused = timerTextView.getBase() - SystemClock.elapsedRealtime();
         startMapIntent.putExtra("timerValue",timerValueWhenPaused);
-        startMapIntent.putExtra("distanceOffset",gpsManager.getDistance()) ;
         startActivity(startMapIntent);
     }
 
@@ -207,7 +224,6 @@ public class LiveRecordingActivity extends AppCompatActivity {
         }
 
         pause();
-
         // 1. Create the recording
         String duration = (String) this.timerTextView.getText();
         Recording r = new Recording(duration,distanceTimes,distances,speedsTimes,speeds,altitudes,hrTimes,hrDataArrayList,temperaturesTimesArray, temperaturesArray, pressuresTimesArray, pressuresArray);

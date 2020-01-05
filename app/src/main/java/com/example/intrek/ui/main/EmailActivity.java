@@ -65,6 +65,7 @@ public class EmailActivity extends AppCompatActivity {
     // Check whether the user was previously registered or not
     private void checkingEmail(final String email, String password) {
         Log.d(TAG, "createAccount:" + email);
+
         if (!validateForm()) {
             return;
         }
@@ -78,31 +79,31 @@ public class EmailActivity extends AppCompatActivity {
         mProgressDialog.show();
 
         // Get different exceptions to decide whether the user was registered or not
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            try {
-                                throw task.getException();
-                            } catch (FirebaseAuthInvalidUserException e) {
-                                Log.d(TAG, "signInWithEmailAndPassword: this is a new user.");
-                                proceedToPassword(email, true);
-                            } catch (FirebaseAuthInvalidCredentialsException e) {
-                                Log.d(TAG, "signInWithEmailAndPassword: known user is back.");
-                                proceedToPassword(email, false);
-                            } catch (Exception e) {
-                                Log.d(TAG, "signInWithEmailAndPassword: known user is back.");
-                                proceedToPassword(email, false);
-                            }
-                        }
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
 
-                        // Hide progress dialog
-                        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-                            mProgressDialog.dismiss();
-                        }
+                if (!task.isSuccessful()) {
+                    try {
+                        throw task.getException();
+                    } catch (FirebaseAuthInvalidUserException e) {
+                        Log.i(TAG, "signInWithEmailAndPassword: this is a new user.");
+                        proceedToPassword(email, true);
+                    } catch (FirebaseAuthInvalidCredentialsException e) {
+                        Log.i(TAG, "signInWithEmailAndPassword: known user is back.");
+                        proceedToPassword(email, false);
+                    } catch (Exception e) {
+                        Log.i(TAG, "signInWithEmailAndPassword: known user is back.");
+                        proceedToPassword(email, false);
                     }
-                });
+                }
+
+                // Hide progress dialog
+                if (mProgressDialog != null && mProgressDialog.isShowing()) {
+                    mProgressDialog.dismiss();
+                }
+            }
+        });
     }
 
     // Create and start an intent to go to PasswordActivity

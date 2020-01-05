@@ -100,6 +100,7 @@ public class LoginActivity extends AppCompatActivity {
     // Handle successful cases for Facebook login
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
+
         // Show progress dialog
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);

@@ -200,7 +200,6 @@ public class Recording implements Serializable {
         this.name = name;
     }
 
-
     public void setStartingTime(String startingTime) {
         this.startingTime = startingTime;
     }
