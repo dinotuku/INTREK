@@ -95,6 +95,8 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
             cancelButton.setEnabled(false);
             shareButton.setVisibility(View.INVISIBLE);
             shareButton.setEnabled(false);
+
+
         }
 
         // 4. Set the sharing action
@@ -292,6 +294,14 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
                 // Set the text of the editText
                 hikeNameEditText.setText(recording.getName(),TextView.BufferType.EDITABLE);
                 hikeNameEditText.setEnabled(false);
+                hikeNameEditText.setCursorVisible(false);
+                hikeNameEditText.setLongClickable(false);
+                hikeNameEditText.setClickable(false);
+                hikeNameEditText.setFocusable(false);
+                hikeNameEditText.setSelected(false);
+                hikeNameEditText.setKeyListener(null);
+                hikeNameEditText.setBackgroundResource(android.R.color.transparent);
+                hikeNameEditText.setTextColor(Color.BLACK);
             }
 
             // plot the map's data
