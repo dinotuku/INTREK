@@ -32,14 +32,8 @@ import static android.content.Context.BIND_AUTO_CREATE;
 public class MicrocontrollerManager {
 
     // Fields coming from outside the class
-
-    private static final int MIN_TILE = 40;
-    private static final int MAX_TILE = 200;
-    private static final int NUMBER_OF_POINTS = 50;
     private static final String TEMP_PLOT = "Temperature from sensorTile";
-    private static final String PRESSURE_PLOT = "Pressure from sensorTile";
     private static final String TAG = "in MicroManager";
-    private boolean hasPlot=false ;
 
     private AppCompatActivity activity ;
     TextView temperatureTextView ;
@@ -48,10 +42,6 @@ public class MicrocontrollerManager {
     private ArrayList<Double> pressuresArray ;
     private ArrayList<Long> temperaturesTimesArray ;
     private ArrayList<Long> pressuresTimesArray ;
-
-    private XYPlot TemperaturePlot;
-    private XYPlot PressurePlot;
-    private XYPlotSeriesList xyPlotSeriesList;
 
 
     private double mTemperature;
@@ -68,7 +58,7 @@ public class MicrocontrollerManager {
 
     // Fields created inside the class
 
-    private MicrocontrollerBroadcastReceiver broadastReceiver ;
+    // private MicrocontrollerBroadcastReceiver broadastReceiver ;
 
 
     // Call this method in the onCreate of the activities which need to receive this data
@@ -125,6 +115,7 @@ public class MicrocontrollerManager {
 
 
 
+    /*
     // Broadcast receiver for the sensorTile
     private class MicrocontrollerBroadcastReceiver extends BroadcastReceiver {
 
@@ -152,21 +143,12 @@ public class MicrocontrollerManager {
                 s = String.valueOf(mPressure) + " [mPa]" ;
                 temperatureTextView.setText(s);
 
-                if (hasPlot) {
-                    // Plot the graph
-                    xyPlotSeriesList.updateSeries(TEMP_PLOT, (int) mTemperature);
-                    XYSeries hrWatchSeries = new SimpleXYSeries(xyPlotSeriesList.getSeriesFromList(TEMP_PLOT),
-                            SimpleXYSeries.ArrayFormat.XY_VALS_INTERLEAVED, TEMP_PLOT);
-                    LineAndPointFormatter formatterPolar = xyPlotSeriesList.getFormatterFromList(TEMP_PLOT);
-                    TemperaturePlot.clear();
-                    TemperaturePlot.addSeries(hrWatchSeries, formatterPolar);
-                    TemperaturePlot.redraw();
-                    // And add HR value to HR ArrayList
-                    temperaturesTimesArray.add(System.currentTimeMillis()-initialTime);
-                    pressuresTimesArray.add(System.currentTimeMillis()-initialTime);
-                    temperaturesArray.add(mTemperature);
-                    pressuresArray.add(mPressure);
-                }
+                // And add HR value to HR ArrayList
+                temperaturesTimesArray.add(System.currentTimeMillis()-initialTime);
+                pressuresTimesArray.add(System.currentTimeMillis()-initialTime);
+                temperaturesArray.add(mTemperature);
+                pressuresArray.add(mPressure);
+
 
 
             }
@@ -177,14 +159,15 @@ public class MicrocontrollerManager {
 
     }
 
+     */
+
     // Allow the characteristic with the temperature and the pressure
     private void registerTileService(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
         String uuid = null;
         // Loops through available GATT Services.
         for (BluetoothGattService gattService : gattServices) {
-            List<BluetoothGattCharacteristic> gattCharacteristics = gattService
-                    .getCharacteristics();
+            List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
             // Loops through available Characteristics.
             for (BluetoothGattCharacteristic
                     gattCharacteristic : gattCharacteristics) {
@@ -236,12 +219,21 @@ public class MicrocontrollerManager {
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 Double mTemperature = intent.getDoubleExtra(BluetoothLeService.TEMPERATURE, -1) /10.0;
                 Double mPressure = intent.getDoubleExtra(BluetoothLeService.PRESSURE, -1)/100.0;
+
+                // Treat the data here
+
+                temperaturesTimesArray.add(System.currentTimeMillis()-initialTime);
+                pressuresTimesArray.add(System.currentTimeMillis()-initialTime);
+                temperaturesArray.add(mTemperature);
+                pressuresArray.add(mPressure);
+
+                // And display the data here
+
                 String s = String.valueOf(mTemperature) + " [C°]" ;
                 temperatureTextView.setText(s);
                 s = String.valueOf(mPressure) + " [mPa]" ;
                 pressureTextView.setText(s);
-                Log.e("In Manager","Temp: "+ mTemperature);
-                Log.e("In Manager","Press: "+ mPressure);
+
             }
         }
     };
