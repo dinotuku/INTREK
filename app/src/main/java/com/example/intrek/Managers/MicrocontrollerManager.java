@@ -3,9 +3,12 @@ package com.example.intrek.Managers;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -23,6 +26,8 @@ import com.example.intrek.ui.main.LiveRecordingActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.Context.BIND_AUTO_CREATE;
 
 public class MicrocontrollerManager {
 
@@ -48,23 +53,30 @@ public class MicrocontrollerManager {
     private XYPlot PressurePlot;
     private XYPlotSeriesList xyPlotSeriesList;
 
-    private BluetoothLeService mBluetoothLeService;
+
     private double mTemperature;
     private double mPressure;
+    private String mDeviceAddress;
+    private boolean mConnected = false;
+
+    public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
+    public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
 
     private BluetoothGattCharacteristic mNotifyCharacteristic;
-
+    private BluetoothLeService mBluetoothLeService;
     private long initialTime = System.currentTimeMillis() ;
 
     // Fields created inside the class
 
-    private MicrocontrollerBroadastReceiver broadastReceiver ;
-    private boolean mConnected = false;
+    private MicrocontrollerBroadcastReceiver broadastReceiver ;
 
-    // Required init
+
 
     // Call this method in the onCreate of the activities which need to receive this data
-    public MicrocontrollerManager(AppCompatActivity activity, TextView temperatureTextView, TextView pressureTextView, ArrayList<Long> temperaturesTimesArray, ArrayList<Double> temperaturesArray, ArrayList<Long> pressuresTimesArray, ArrayList<Double> pressuresArray) {
+    public MicrocontrollerManager(AppCompatActivity activity, TextView temperatureTextView,
+                                  TextView pressureTextView, ArrayList<Long> temperaturesTimesArray,
+                                  ArrayList<Double> temperaturesArray, ArrayList<Long> pressuresTimesArray,
+                                  ArrayList<Double> pressuresArray, String mDeviceAddress) {
         this.activity = activity;
         this.temperatureTextView = temperatureTextView;
         this.pressureTextView = pressureTextView;
@@ -72,29 +84,50 @@ public class MicrocontrollerManager {
         this.temperaturesArray = temperaturesArray;
         this.pressuresTimesArray = pressuresTimesArray ;
         this.pressuresArray = pressuresArray;
+        this.mDeviceAddress = mDeviceAddress;
     }
 
-    // Methods to handle the class
-
-    public void startRecording() {
-        //Get the HR data back from the watch
-        // todo 3: create the Broadcast receiver -> OK
-        broadastReceiver = new MicrocontrollerManager.MicrocontrollerBroadastReceiver();
-
-        // todo 4: register it to the local broadast manager -> OK
-        LocalBroadcastManager.getInstance(activity).registerReceiver(broadastReceiver,
-                new IntentFilter(LiveRecordingActivity.ACTION_RECEIVE_TILE));
-
-
+    // Start recording data
+    public void startRecording(){
+        Intent gattServiceIntent = new Intent(activity, BluetoothLeService.class);
+        activity.bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        activity.registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        if (mBluetoothLeService != null) {
+            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
+            Log.e(TAG, "Connect request result=" + result);
+        }
     }
 
-    public void stopRecording() {
-        // todo 5: unregister it from the manager
-        LocalBroadcastManager.getInstance(activity).unregisterReceiver(broadastReceiver);
+    // Stop Recording data
+    public void stopRecording(){
+        activity.unregisterReceiver(mGattUpdateReceiver);
     }
 
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
-    private class MicrocontrollerBroadastReceiver extends BroadcastReceiver {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            Log.e(TAG, "Inside OnServiceConnected");
+            if (!mBluetoothLeService.initialize()) {
+                Log.e(TAG, "Unable to initialize Bluetooth");
+            }
+            // Automatically connects to the device upon successful start-up initialization.
+            mBluetoothLeService.connect(mDeviceAddress);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
+
+
+
+
+    // Broadcast receiver for the sensorTile
+    private class MicrocontrollerBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -115,6 +148,10 @@ public class MicrocontrollerManager {
                 mPressure = intent.getDoubleExtra(BluetoothLeService.PRESSURE, -1)/100.0;
                 Log.e("In Manager","Temp: "+ mTemperature);
                 Log.e("In Manager","Press: "+ mPressure);
+                String s = String.valueOf(mTemperature) + " [C°]" ;
+                temperatureTextView.setText(s);
+                s = String.valueOf(mPressure) + " [mPa]" ;
+                temperatureTextView.setText(s);
 
                 if (hasPlot) {
                     // Plot the graph
@@ -141,6 +178,7 @@ public class MicrocontrollerManager {
 
     }
 
+    // Allow the characteristic with the temperature and the pressure
     private void registerTileService(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
         String uuid = null;
@@ -152,7 +190,6 @@ public class MicrocontrollerManager {
             for (BluetoothGattCharacteristic
                     gattCharacteristic : gattCharacteristics) {
                 uuid = gattCharacteristic.getUuid().toString();
-                Log.e(TAG, "Value : " + gattCharacteristic.getValue());
                 // Find heart rate measurement (0x2A37)
                 if (SampleGattAttributes.lookup(uuid, "unknown")
                         .equals("Pressure + Temperature ")) {
@@ -173,12 +210,55 @@ public class MicrocontrollerManager {
                         mBluetoothLeService.setCharacteristicNotification(
                                 gattCharacteristic, true);
                     }
-                    Log.e(TAG, "Registering for Pressure and Temperature measurement");
-                    mBluetoothLeService.setCharacteristicNotification(
-                            gattCharacteristic, true);
                 }
             }
         }
+    }
+
+    // Handles various events fired by the Service.
+    // ACTION_GATT_CONNECTED: connected to a GATT server.
+    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
+    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
+    // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
+    //                        or notification operations.
+    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+                mConnected = true;
+                activity.invalidateOptionsMenu();
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                mConnected = false;
+                activity.invalidateOptionsMenu();
+            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                // Show all the supported services and characteristics on the user interface.
+                registerTileService(mBluetoothLeService.getSupportedGattServices());
+            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+                Double mTemperature = intent.getDoubleExtra(BluetoothLeService.TEMPERATURE, -1) /10.0;
+                Double mPressure = intent.getDoubleExtra(BluetoothLeService.PRESSURE, -1)/100.0;
+                String s = String.valueOf(mTemperature) + " [C°]" ;
+                temperatureTextView.setText(s);
+                s = String.valueOf(mPressure) + " [mPa]" ;
+                pressureTextView.setText(s);
+                Log.e("In Manager","Temp: "+ mTemperature);
+                Log.e("In Manager","Press: "+ mPressure);
+            }
+        }
+    };
+
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
+        return intentFilter;
+    }
+
+    public void destroy(){
+        activity.unbindService(mServiceConnection);
+        mBluetoothLeService = null;
     }
 }
 
