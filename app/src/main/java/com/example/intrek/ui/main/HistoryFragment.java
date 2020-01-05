@@ -146,12 +146,13 @@ public class HistoryFragment extends Fragment {
 
             // Get statistics
             ArrayList<RecordingData> statistics = getItem(position).getStatistics();
-            String name = getItem(position).getName();
+            Recording r = getItem(position);
+            String name = r.getName() + " (" + r.getActivityType() + ")";
             String time = getItem(position).getStartingTime();
-            String duration = getItem(position).getDuration();
-            String distance = getItem(position).getDistance();
+            String duration = r.getDuration();
+            String distance = r.getDistance();
             String pace = statistics.get(0).getAverage();
-            String elev = String.format(Locale.US, "%.2f [m]", getItem(position).getElevationGain());
+            String elev = String.format(Locale.US, "%.2f [m]", r.getElevationGain());
 
             // Show statistics and map
             ((TextView) row.findViewById(R.id.hike_name)).setText(name);
@@ -160,7 +161,7 @@ public class HistoryFragment extends Fragment {
             ((TextView) row.findViewById(R.id.hike_distance)).setText(distance);
             ((TextView) row.findViewById(R.id.hike_pace)).setText(pace);
             ((TextView) row.findViewById(R.id.hike_elev_gain)).setText(elev);
-            new DownloadImageTask((ImageView) row.findViewById(R.id.mapImage)).execute(getItem(position).getMapUrl());
+            new DownloadImageTask((ImageView) row.findViewById(R.id.mapImage)).execute(r.getMapUrl());
 
             return row;
         }

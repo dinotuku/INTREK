@@ -26,7 +26,7 @@ public class NewRecordingFragment extends Fragment {
 
     // MARK: - Public variables
 
-    public static final ArrayList<String> ACTIVITY_TYPES = new ArrayList<String>(Arrays.asList("Running","Mountain Hiking","City Hiking"));
+    public static final ArrayList<String> ACTIVITY_TYPES = new ArrayList<String>(Arrays.asList("Running","Mountain Hiking","City Hiking","Cycling","Mountain Cycling", "Skying"));
     public static final String SELECTED_INDEX = "SelectedIndex";
 
     // MARK: - Private variables
@@ -100,6 +100,7 @@ public class NewRecordingFragment extends Fragment {
         String uid = getActivity().getIntent().getExtras().getString(ProfileFragment.UID);
         Intent intent = new Intent(getActivity(), LiveRecordingActivity.class);
         intent.putExtra(ProfileFragment.UID,uid) ;
+        intent.putExtra(NewRecordingFragment.SELECTED_INDEX,selectedType);
         startActivity(intent);
 
     }
@@ -115,5 +116,10 @@ public class NewRecordingFragment extends Fragment {
     // This function will update the text displayed on the type button
     private void updateTypeButtonText() {
         typeButton.setText(ACTIVITY_TYPES.get(this.selectedType));
+    }
+
+    //// METHOD TO HAVE TYPE OF THE HIKE
+    public static String getActivityType(int index) {
+        return ACTIVITY_TYPES.get(index);
     }
 }

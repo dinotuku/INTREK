@@ -175,10 +175,11 @@ public class ProfileFragment extends Fragment {
                             String name = rec.child("name").getValue().toString();
                             String mapUrl = rec.child("mapUrl").getValue().toString();
                             String duration = rec.child("duration").getValue().toString();
+                            String activityType = rec.child("activityType").getValue().toString();
                             Double elevationGain = Double.valueOf(rec.child("elevationGain").getValue().toString()) ;
 
                             // Save generic information to the Recording object
-                            recording.setGenericInformation(startingTime, name, mapUrl, duration, elevationGain);
+                            recording.setGenericInformation(startingTime, name, mapUrl, duration, elevationGain,activityType);
 
                             recordings.add(recording);
 

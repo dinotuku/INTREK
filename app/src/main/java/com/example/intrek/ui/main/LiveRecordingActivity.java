@@ -78,7 +78,6 @@ public class LiveRecordingActivity extends AppCompatActivity {
     private HRManager hrManager ;
     private MicrocontrollerManager microcontrollerManager ;
 
-
     // For the location
     private int i = 0 ;
 
@@ -219,9 +218,11 @@ public class LiveRecordingActivity extends AppCompatActivity {
 
         // 2. Send it to the new activity
         String uid = getIntent().getStringExtra(ProfileFragment.UID);
+        int selectedType = getIntent().getIntExtra(NewRecordingFragment.SELECTED_INDEX,0);
         Intent i = new Intent(LiveRecordingActivity.this, RecordingAnalysisActivity.class);
         i.putExtra("Recording", r);
         i.putExtra(ProfileFragment.UID,uid);
+        i.putExtra(NewRecordingFragment.SELECTED_INDEX,selectedType);
         startActivity(i);
     }
     //endregion

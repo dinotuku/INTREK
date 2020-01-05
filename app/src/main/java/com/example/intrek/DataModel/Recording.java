@@ -38,6 +38,7 @@ public class Recording implements Serializable {
     private String name;
     private String mapUrl ;
     private Double elevationGain ;
+    private String activityType ;
 
 
     //// Collected data on the hike to be analysed
@@ -98,12 +99,13 @@ public class Recording implements Serializable {
     }
 
     // This method is called when receivng the data from firebase
-    public void setGenericInformation(String startingTime, String name, String mapUrl, String duration, Double elevationGain) {
+    public void setGenericInformation(String startingTime, String name, String mapUrl, String duration, Double elevationGain, String activityType) {
         this.startingTime = startingTime;
         this.name = name ;
         this.mapUrl = mapUrl ;
         this.duration = duration ;
         this.elevationGain = elevationGain ;
+        this.activityType = activityType ;
     }
 
     // Save recording to Firebase realtime database. The user Id is reauired in order to save the data to the correct user.
@@ -121,6 +123,7 @@ public class Recording implements Serializable {
                 // Save everything
                 mutableData.child("startingTime").setValue(startingTime);
                 mutableData.child("name").setValue(name);
+                mutableData.child("activityType").setValue(activityType);
                 mutableData.child("elevationGain").setValue(elevationGain);
                 mutableData.child("mapUrl").setValue(mapUrl);
                 mutableData.child("duration").setValue(duration);
@@ -197,12 +200,21 @@ public class Recording implements Serializable {
         this.name = name;
     }
 
+
     public void setStartingTime(String startingTime) {
         this.startingTime = startingTime;
     }
 
     public void setElevationGain(Double elevationGain) {
         this.elevationGain = elevationGain;
+    }
+
+    public String getActivityType() {
+        return activityType;
+    }
+
+    public void setActivityType(String activityType) {
+        this.activityType = activityType;
     }
 
     public Double getElevationGain() {

@@ -22,12 +22,23 @@
         android:id="@+id/cancelButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
         android:onClick="cancelButtonTapped"
         android:text="Discard"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/SaveButton"
         app:layout_constraintTop_toTopOf="@+id/SaveButton" />
+
+    <Button
+        android:id="@+id/mShareButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:text="Share"
+        app:layout_constraintStart_toEndOf="@+id/SaveButton"
+        app:layout_constraintTop_toTopOf="@+id/SaveButton"
+         />
 
     <ListView
         android:id="@+id/statisticsListView"

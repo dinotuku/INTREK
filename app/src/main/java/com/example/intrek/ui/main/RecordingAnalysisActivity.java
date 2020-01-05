@@ -7,11 +7,15 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
@@ -54,6 +58,8 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
 
     private Recording recording ;
     private String uid ;
+    private int selectedType ;
+    Bitmap imageBitmap ;
     private ListView listView;
     private boolean isFromLiveRecording;
 
@@ -67,10 +73,13 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recording_analysis);
         Button cancelButton = findViewById(R.id.cancelButton);
         cancelButton.bringToFront();
+        Button shareButton = findViewById(R.id.mShareButton);
+        shareButton.bringToFront();
 
         // 1. Obtain the recording
         recording = (Recording) getIntent().getSerializableExtra("Recording");
         uid = getIntent().getStringExtra(ProfileFragment.UID);
+        selectedType = getIntent().getIntExtra(NewRecordingFragment.SELECTED_INDEX,-1) ;
 
         // 2. Set the list view
         setListView();
@@ -84,7 +93,18 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
             saveButton.setEnabled(false);
             cancelButton.setVisibility(View.INVISIBLE);
             cancelButton.setEnabled(false);
+            shareButton.setVisibility(View.INVISIBLE);
+            shareButton.setEnabled(false);
         }
+
+        // 4. Set the sharing action
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareButtonTap();
+            }
+        });
+
     }
 
 
@@ -103,6 +123,7 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
         } else {
             // set name
             recording.setName(text);
+            recording.setActivityType(NewRecordingFragment.getActivityType(selectedType));
             // save to Firebase
             recording.saveToFirebase(uid);
             // Come back to first page
@@ -118,7 +139,7 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
     }
 
     public void cancelButtonTapped(View view) {
-        Intent i = new Intent(RecordingAnalysisActivity.this, MainActivity.class);        // Specify any activity here e.g. home or splash or login etc
+        Intent i = new Intent(RecordingAnalysisActivity.this, MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -126,6 +147,52 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
         i.putExtra(ProfileFragment.UID,uid);
         startActivity(i);
         finish();
+    }
+
+    public void shareButtonTap() {
+
+        // Activate sensor reading
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == PackageManager.PERMISSION_DENIED) {
+            requestPermissions(new String[]{"android.permission.READ_EXTERNAL_STORAGE"}, 0);
+        }
+
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_EMAIL  , new String[]{"recipient@example.com"});
+
+        //// Construct the body of the message
+        // 1. get the name of the hike
+        String hikeName = hikeNameEditText.getText().toString();
+        if (hikeName.isEmpty()) {
+            hikeName = "no_name" ;
+        }
+        String title = "My hike: " + hikeName ;
+
+        // 2. Get some statistics about the hike
+        String body = "" ;
+        body += "On the " + recording.getStartingTime() + ", I did a great hike " + hikeName + ". \n\n" ;
+        body += "During this hike, here are my performances: \n" ;
+        body += "- Activity type: " + NewRecordingFragment.getActivityType(selectedType) + "\n";
+        body += "- Distance: " + recording.getDistance() +  " \n";
+        body += "- Average pace: " + nf.format(recording.getAvePace()) + " min/km\n";
+        body += "- Elevation gain: " + nf.format(recording.getElevationGain()) + " m\n" ;
+
+        body += "\n\nYou can find attached on this mail the path I did ! \n" ;
+        body += "The recording was done with INTREK, a  cool app designed for a super cool EPFL's course: EE-490G\n\n";
+
+        body += "Keep exercising, \n\n Best";
+
+
+        String path = MediaStore.Images.Media.insertImage(getContentResolver(), imageBitmap,"title", null);
+        Uri screenshotUri = Uri.parse(path);
+        i.putExtra(Intent.EXTRA_SUBJECT, title);
+        i.putExtra(Intent.EXTRA_TEXT   , body);
+        i.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+        try {
+            startActivity(Intent.createChooser(i, "Send mail..."));
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(RecordingAnalysisActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // This method is here to set the list view.
@@ -272,6 +339,7 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
 
     // This inner class is used to download an image from Internet
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+
         ImageView bmImage;
 
         public DownloadImageTask(ImageView bmImage) {
@@ -292,6 +360,7 @@ public class RecordingAnalysisActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(Bitmap result) {
+            imageBitmap = result ;
             bmImage.setImageBitmap(result);
         }
     }
