@@ -4,6 +4,8 @@ Group 2.C: Sports e-hiking
 
 > ### Track hikes with your phone, smartwatch and sensors
 
+This app was done for a project of EPLF's class: EE-490G. We developed an Hiking app which allow the user to Hike while monitoring his/her performances. The application uses 3 sources of data inputs: the GPS data of the phone, the measured data from a connected watch, and the collected data from a connected board with some sensors. While the user is 'on recording', the application allows him/her to see its live perfomances either on the mobile or on the connected watch. The user can also see where he/she is and the traveled path. At the end of one activity, the user sees a recap of all the data with some statistics coming with it. He/She then has the possibility to share the hike with his friends and to save it on Firebase in order to retrieve it later on the application, in the 'History' part of the application. 
+
 ## Our Setup
 
 #### Software
@@ -21,28 +23,30 @@ Group 2.C: Sports e-hiking
 
 #### DataModel
 * `Profile` - Store user information and statistics.
-* `Recording` - Contain all the data of one recording and all the functions required to plot it on a analysis session.
-* `RecordingData` - This class is implemented to provide an array and its time value. It is used to pass them as reference values for the rows in list view of statistics. One element of this class can be plotted on a plot of the analysis activity
+* `Recording` - Contain all the data of one recording and all the functions required to plot it on a analysis session. This class is the class that is saved on Firebase. 
+* `RecordingData` - This class is implemented to provide an array and its time value. It is used to pass them as reference values for the rows in list view of statistics. One element of this class can be plotted on a plot of the analysis activity. 
 * `XYPlotSeriesList` - This class is used to save all the data which needs to be plot by our graph. The class can be used to plot different series.
 
 #### Interfaces
-* `OnPositionUpdatedCallback` - Handle moments when a new point is computed in order to update the path on the map.
+* `OnPositionUpdatedCallback` - Handle moments when a new point is computed by the GPS in order to update the path on the map. The class was used to have more comprenhensible code. 
 
 #### Managers
-* `GPSManager` - Handle the GPS over an activity. It will handle all the receiving of new data by the GPS values and the updating of the appropriate TextView. 
-* `HRManager`- Take care of receiving and displaying the data from the watch.
+All the inputs of data are handled using the 3 following classes. They are used to have clean code, comprenhensible and reusable in different classes without copy-pasting code between different classes. Indeed, data is collected on more than simply one activity. 
+* `GPSManager` - Handle the GPS over an activity. It will handle all the receiving of new data by the GPS values. It will update the arrays containing the data, the TextViews to display them, eventually send it to the watch, and compute some statistics. 
+* `HRManager`- Take care of receiving and displaying the data from the watch. It can also show the data on a plot, if the PlotView is provided. 
+* `MicrocontrollerManager` - As for the two previous classes, it handles the receiving of new data from the connected board. Namely, it is here that all the bleutooth functionalities are implemented. 
 
 #### ui.main
 * `EmailActivity` - For user to enter email. It will get different exceptions, decides whether the user is registered or not, and send the result to PasswordActivity.
 * `HistoryActivity` - Show activity history. It will fetch data on Firebase and show all the recordings in a list view.
 * `InformationActivity` - For user to enter username and select profile picture. It will save these information to Firebase at the end.
 * `LiveMapActivity` - Show a live map with the current location and some key statistics when user starts an activity.
-* `LiveRecordingActivity` - Show statistics and heart rate plot when user starts an activity.
+* `LiveRecordingActivity` - Show statistics and heart rate plot when user starts an activity. It is the main activity for when using the app. 
 * `LoginActivity` - The entry activity. It provides two login options, Facebook login and email/password login.
 * `NewRecordingActivity` - The activity before a live recording. It provides user different types of activities.
 * `PasswordActivity` - For user to enter password. It will validate the password and use FirebaseAuth to either sign in or register the user depending on the exceptions threw in EmailActivity.
 * `ProfileFragment` - Show user information and statistics. It will fetch data on Firebase and do some simple calculation.
-* `RecordingAnalysisActivity` - Show a summary of a completed hike. The summary will contain statistics and plots of sensor values.
+* `RecordingAnalysisActivity` - Show a summary of a completed hike. The summary will contain statistics and plots of sensor values. Then it takes care of dealing with the recording (User can save it, share it, or discard it).
 * `SectionsPagerAdapter` - A FragmentPagerAdapter that returns a fragment corresponding to one of the sections/tabs/pages.
 * `TypePickerPopUp` - Handle the picker in NewRecordingActivity.
 
