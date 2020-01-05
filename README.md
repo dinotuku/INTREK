@@ -36,6 +36,13 @@ All the inputs of data are handled using the 3 following classes. They are used 
 * `HRManager`- Take care of receiving and displaying the data from the watch. It can also show the data on a plot, if the PlotView is provided. 
 * `MicrocontrollerManager` - As for the two previous classes, it handles the receiving of new data from the connected board. Namely, it is here that all the bleutooth functionalities are implemented. 
 
+#### SensorTile
+This class are use for implement the microcontroller sensorTile in our application. 
+* `BluetoothLeService` - Service for connect a device in BLE (bluetooth Low Energy). The device use the value in SampleGattAtributes for find the characteristic who contains the temperature and the pressure. The datas are then convert thanks to NumberConversion.
+* `DeviceScanActivity` - Activity who scan all of the device available. Return the device choose by the user. 
+* `SampleGattAtributes`- Some attributes of the sensorTile allow to recognise some services and characteristics
+* `NumberConversion` - Methods use for convert the data in little endian to integer or short.
+
 #### ui.main
 * `EmailActivity` - For user to enter email. It will get different exceptions, decides whether the user is registered or not, and send the result to PasswordActivity.
 * `HistoryActivity` - Show activity history. It will fetch data on Firebase and show all the recordings in a list view.
