@@ -61,7 +61,7 @@ This class are use for implement the microcontroller sensorTile in our applicati
 
 | Arthur Bricq | Adrien Thirion | Kuan Tung |
 | :---: |:---:| :---:|
-| <img src="https://scontent.ftpe7-1.fna.fbcdn.net/v/t1.0-1/p320x320/58384228_2796106190430223_6880243506011439104_n.jpg?_nc_cat=100&_nc_ohc=IyTrcDxQazsAQnU_g7mzZJ8_bmezn-iPgOUXvfvHdbi46m4-ymBXmAFCw&_nc_ht=scontent.ftpe7-1.fna&oh=1c94d3eaa8f6e7059e75fd1cfd814509&oe=5EAA7F99" width=100> | <img src="https://scontent.ftpe7-4.fna.fbcdn.net/v/t1.0-1/p320x320/69374738_1666631240136834_9156000338036129792_n.jpg?_nc_cat=101&_nc_ohc=KFL8NJ_Nl4oAQmPUB1LYeaWJk233z0s3qBAM7zTzOp4BgQxWOXmuXImUQ&_nc_ht=scontent.ftpe7-4.fna&oh=9489c4736b58dcf438959d7c3d90b08e&oe=5E9F979D" width=100> | <img src="https://scontent.ftpe7-3.fna.fbcdn.net/v/t1.0-1/p320x320/44598597_2395336093814687_5861457721299042304_o.jpg?_nc_cat=108&_nc_ohc=S9RMSb64YhoAQkGyn-scFiV2xMyg6XZIv2dDWvzZXFz29QswtojFaU-Ww&_nc_ht=scontent.ftpe7-3.fna&oh=5f0d1fd5c995b718238bd81a7d123faf&oe=5E9D09A9" width=100>  |
+| <img src="https://avatars3.githubusercontent.com/u/36046994?s=460&u=834398861e545b697279cb240e139f25d6f2b8aa&v=4" width=100> | <img src="https://avatars3.githubusercontent.com/u/55891808?s=460&u=3422f68f50e59ae08d698add6854e3d6c7f144ac&v=4" width=100> | <img src="https://avatars3.githubusercontent.com/u/23370352?s=460&u=a3cae29e291984fc8a7533252653ea1b4b121f1c&v=4" width=100>  |
 | <a href="https://github.com/arthurBricq" target="_blank">`arthurBricq`</a> | <a href="https://github.com/AdrienThirion" target="_blank">`AdrienThirion`</a> | <a href="https://github.com/dinotuku" target="_blank">`dinotuku`</a> |
 
 ## References
